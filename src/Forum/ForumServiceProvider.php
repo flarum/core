@@ -117,6 +117,10 @@ class ForumServiceProvider extends AbstractServiceProvider
         $this->app->bind('flarum.frontend.forum', function () {
             return $this->app->make('flarum.frontend.factory')('forum');
         });
+
+        $this->app->singleton('flarum.auth.supported_drivers', function () {
+            return [];
+        });
     }
 
     /**

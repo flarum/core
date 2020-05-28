@@ -9,11 +9,12 @@
 
 namespace Flarum\Forum\Auth;
 
-/**
- * @deprecated in favor of Flarum\Forum\Auth\SsoResponse
- */
-class Registration
+class SsoResponse
 {
+    protected $provider;
+
+    protected $identifier;
+
     /**
      * @var array
      */
@@ -27,7 +28,42 @@ class Registration
     /**
      * @var mixed
      */
-    protected $payload;
+    protected $payload = [];
+
+    /**
+     * @var string
+     */
+    public function __construct(string $provider)
+    {
+        $this->provider = $provider;
+    }
+
+    /**
+     * @return string
+     */
+    public function getProvider(): string
+    {
+        return $this->provider;
+    }
+
+    /**
+     * @return string
+     */
+    public function getIdentifier(): string
+    {
+        return $this->identifier;
+    }
+
+    /**
+     * @param string $identifier
+     * @return $this
+     */
+    public function withIdentifier(string $identifier): self
+    {
+        $this->identifier = $identifier;
+
+        return $this;
+    }
 
     /**
      * @return array
@@ -68,8 +104,19 @@ class Registration
     /**
      * @param string $email
      * @return $this
+     *
+     * @deprecated in favor of provideEmail(), as email trustiness is now determined in admin settings.
      */
     public function provideTrustedEmail(string $email): self
+    {
+        return $this->provide('email', $email);
+    }
+
+    /**
+     * @param string $email
+     * @return $this
+     */
+    public function provideEmail(string $email): self
     {
         return $this->provide('email', $email);
     }

@@ -60,6 +60,14 @@ class ForumSerializer extends AbstractSerializer
      */
     protected function getDefaultAttributes($model)
     {
+        $ssoProviders = array_filter($this->app->make('flarum.auth.supported_drivers'), function ($provider) {
+            return $this->settings->get('auth_driver_enabled_'.$provider);
+        }, ARRAY_FILTER_USE_KEY);
+
+        $ssoProviders = array_map(function ($provider) {
+            return $this->app->make($provider)->meta();
+        }, $ssoProviders);
+
         $attributes = [
             'title' => $this->settings->get('forum_title'),
             'description' => $this->settings->get('forum_description'),
@@ -77,10 +85,12 @@ class ForumSerializer extends AbstractSerializer
             'headerHtml' => $this->settings->get('custom_header'),
             'footerHtml' => $this->settings->get('custom_footer'),
             'allowSignUp' => (bool) $this->settings->get('allow_sign_up'),
+            'enablePasswordAuth' => (bool) $this->settings->get('enable_password_auth', true),
             'defaultRoute'  => $this->settings->get('default_route'),
             'canViewDiscussions' => $this->actor->can('viewDiscussions'),
             'canStartDiscussion' => $this->actor->can('startDiscussion'),
-            'canViewUserList' => $this->actor->can('viewUserList')
+            'canViewUserList' => $this->actor->can('viewUserList'),
+            'ssoProviders' => $ssoProviders,
         ];
 
         if ($this->actor->can('administrate')) {

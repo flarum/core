@@ -62,6 +62,7 @@ class WriteSettings implements Step
             'custom_less' => '',
             'default_locale' => 'en',
             'default_route' => '/all',
+            'enable_password_auth' => '1',
             'extensions_enabled' => '[]',
             'forum_title' => 'A new Flarum forum',
             'forum_description' => '',

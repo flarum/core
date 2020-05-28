@@ -313,4 +313,11 @@ return function (RouteCollection $map, RouteHandlerFactory $route) {
         'mailSettings.index',
         $route->toController(Controller\ShowMailSettingsController::class)
     );
+
+    // Delete a sso provider
+    $map->delete(
+        '/auth/{provider}',
+        'ssoProvider.delete',
+        $route->toController(Controller\DeleteSsoProviderController::class)
+    );
 };

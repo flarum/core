@@ -148,7 +148,7 @@ class RegisterUserHandler
         $token->delete();
 
         if ($token->provider && $token->identifier) {
-            $user->loginProviders()->create([
+            $user->ssoProviders()->create([
                 'provider' => $token->provider,
                 'identifier' => $token->identifier
             ]);

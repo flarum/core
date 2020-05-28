@@ -25,7 +25,8 @@ class CurrentUserSerializer extends UserSerializer
             'markedAllAsReadAt'        => $this->formatDate($user->marked_all_as_read_at),
             'unreadNotificationCount'  => (int) $user->getUnreadNotificationCount(),
             'newNotificationCount'     => (int) $user->getNewNotificationCount(),
-            'preferences'              => (array) $user->preferences
+            'preferences'              => (array) $user->preferences,
+            'ssoProviders'             => (array) $user->ssoProviderNames(),
         ];
 
         return $attributes;

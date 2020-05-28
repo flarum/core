@@ -10,6 +10,8 @@
 namespace Flarum\Api\Controller;
 
 use Flarum\Http\AccessToken;
+use Flarum\Settings\SettingsRepositoryInterface;
+use Flarum\User\AssertPermissionTrait;
 use Flarum\User\Exception\NotAuthenticatedException;
 use Flarum\User\UserRepository;
 use Illuminate\Contracts\Bus\Dispatcher as BusDispatcher;
@@ -22,6 +24,8 @@ use Psr\Http\Server\RequestHandlerInterface;
 
 class CreateTokenController implements RequestHandlerInterface
 {
+    use AssertPermissionTrait;
+
     /**
      * @var \Flarum\User\UserRepository
      */
@@ -38,15 +42,26 @@ class CreateTokenController implements RequestHandlerInterface
     protected $events;
 
     /**
+     * @var SettingsRepositoryInterface
+     */
+    protected $settings;
+
+    /**
      * @param UserRepository $users
      * @param BusDispatcher $bus
      * @param EventDispatcher $events
+     * @param SettingsRepositoryInterface $settings
      */
-    public function __construct(UserRepository $users, BusDispatcher $bus, EventDispatcher $events)
-    {
+    public function __construct(
+        UserRepository $users,
+        BusDispatcher $bus,
+        EventDispatcher $events,
+        SettingsRepositoryInterface $settings
+    ) {
         $this->users = $users;
         $this->bus = $bus;
         $this->events = $events;
+        $this->settings = $settings;
     }
 
     /**
@@ -64,6 +79,12 @@ class CreateTokenController implements RequestHandlerInterface
 
         if (! $user || ! $user->checkPassword($password)) {
             throw new NotAuthenticatedException;
+        }
+
+        // If password authentication disabled, throw an error
+        // if the user is not an admin.
+        if (! $this->settings->get('enable_password_auth', true)) {
+            $this->assertAdmin($user);
         }
 
         $token = AccessToken::generate($user->id, $lifetime);

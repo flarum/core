@@ -60,6 +60,16 @@ export default class AdminNav extends Component {
     );
 
     items.add(
+      'auth',
+      AdminLinkButton.component({
+        href: app.route('auth'),
+        icon: 'fas fa-lock',
+        children: app.translator.trans('core.admin.nav.auth_button'),
+        description: app.translator.trans('core.admin.nav.auth_text'),
+      })
+    );
+
+    items.add(
       'permissions',
       AdminLinkButton.component({
         href: app.route('permissions'),

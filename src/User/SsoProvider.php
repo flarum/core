@@ -19,10 +19,8 @@ use Flarum\Database\AbstractModel;
  * @property \Illuminate\Support\Carbon $created_at
  * @property \Illuminate\Support\Carbon $last_login_at
  * @property-read User $user
- *
- * @deprecated in favor of Flarum\User\SsoProvider
  */
-class LoginProvider extends AbstractModel
+class SsoProvider extends AbstractModel
 {
     protected $dates = ['created_at', 'last_login_at'];
 
@@ -33,7 +31,7 @@ class LoginProvider extends AbstractModel
     protected $fillable = ['provider', 'identifier'];
 
     /**
-     * Get the user that the login provider belongs to.
+     * Get the user that the sso provider belongs to.
      */
     public function user()
     {

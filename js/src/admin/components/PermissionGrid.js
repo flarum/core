@@ -133,23 +133,6 @@ export default class PermissionGrid extends Component {
       100
     );
 
-    items.add(
-      'signUp',
-      {
-        icon: 'fas fa-user-plus',
-        label: app.translator.trans('core.admin.permissions.sign_up_label'),
-        setting: () =>
-          SettingDropdown.component({
-            key: 'allow_sign_up',
-            options: [
-              { value: '1', label: app.translator.trans('core.admin.permissions_controls.signup_open_button') },
-              { value: '0', label: app.translator.trans('core.admin.permissions_controls.signup_closed_button') },
-            ],
-          }),
-      },
-      90
-    );
-
     items.add('viewLastSeenAt', {
       icon: 'far fa-clock',
       label: app.translator.trans('core.admin.permissions.view_last_seen_at_label'),

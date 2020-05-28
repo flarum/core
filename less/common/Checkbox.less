@@ -54,6 +54,12 @@
     box-shadow: 0 2px 4px @shadow-color;
   }
 }
+.Checkbox--switch.disabled {
+    color: @muted-more-color;
+    .Checkbox-display {
+        opacity: 0.5;
+    }
+}
 .Checkbox-display {
   font-size: 14px;
 
@@ -64,7 +70,7 @@
     color: #d0021b;
   }
   .disabled & {
-    color: @muted-more-color !important;
+    color: @muted-more-color;
   }
 }
 .Checkbox--switch.loading {

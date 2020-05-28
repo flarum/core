@@ -154,7 +154,7 @@ export default class ForumApplication extends Application {
    * @public
    */
   authenticationComplete(payload) {
-    if (payload.loggedIn) {
+    if (payload.loggedIn || payload.testSuccess) {
       window.location.reload();
     } else {
       const modal = new SignUpModal(payload);

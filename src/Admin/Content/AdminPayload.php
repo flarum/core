@@ -70,6 +70,10 @@ class AdminPayload
             new Deserializing($settings)
         );
 
+        $ssoDrivers = array_map(function ($driver) {
+            return $this->container->make($driver)->meta();
+        }, $this->container->make('flarum.auth.supported_drivers'));
+
         $document->payload['settings'] = $settings;
         $document->payload['permissions'] = Permission::map();
         $document->payload['extensions'] = $this->extensions->getExtensions()->toArray();
@@ -78,5 +82,6 @@ class AdminPayload
 
         $document->payload['phpVersion'] = PHP_VERSION;
         $document->payload['mysqlVersion'] = $this->db->selectOne('select version() as version')->version;
+        $document->payload['ssoDrivers'] = $ssoDrivers;
     }
 }

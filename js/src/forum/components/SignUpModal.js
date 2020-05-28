@@ -64,65 +64,67 @@ export default class SignUpModal extends Modal {
   fields() {
     const items = new ItemList();
 
-    items.add(
-      'username',
-      <div className="Form-group">
-        <input
-          className="FormControl"
-          name="username"
-          type="text"
-          placeholder={extractText(app.translator.trans('core.forum.sign_up.username_placeholder'))}
-          value={this.username()}
-          onchange={m.withAttr('value', this.username)}
-          disabled={this.loading || this.isProvided('username')}
-        />
-      </div>,
-      30
-    );
-
-    items.add(
-      'email',
-      <div className="Form-group">
-        <input
-          className="FormControl"
-          name="email"
-          type="email"
-          placeholder={extractText(app.translator.trans('core.forum.sign_up.email_placeholder'))}
-          value={this.email()}
-          onchange={m.withAttr('value', this.email)}
-          disabled={this.loading || this.isProvided('email')}
-        />
-      </div>,
-      20
-    );
-
-    if (!this.props.token) {
+    if (app.forum.attribute('enablePasswordAuth') || this.props.token) {
       items.add(
-        'password',
+        'username',
         <div className="Form-group">
           <input
             className="FormControl"
-            name="password"
-            type="password"
-            placeholder={extractText(app.translator.trans('core.forum.sign_up.password_placeholder'))}
-            value={this.password()}
-            onchange={m.withAttr('value', this.password)}
-            disabled={this.loading}
+            name="username"
+            type="text"
+            placeholder={extractText(app.translator.trans('core.forum.sign_up.username_placeholder'))}
+            value={this.username()}
+            onchange={m.withAttr('value', this.username)}
+            disabled={this.loading || this.isProvided('username')}
           />
         </div>,
-        10
+        30
+      );
+
+      items.add(
+        'email',
+        <div className="Form-group">
+          <input
+            className="FormControl"
+            name="email"
+            type="email"
+            placeholder={extractText(app.translator.trans('core.forum.sign_up.email_placeholder'))}
+            value={this.email()}
+            onchange={m.withAttr('value', this.email)}
+            disabled={this.loading || this.isProvided('email')}
+          />
+        </div>,
+        20
+      );
+
+      if (!this.props.token) {
+        items.add(
+          'password',
+          <div className="Form-group">
+            <input
+              className="FormControl"
+              name="password"
+              type="password"
+              placeholder={extractText(app.translator.trans('core.forum.sign_up.password_placeholder'))}
+              value={this.password()}
+              onchange={m.withAttr('value', this.password)}
+              disabled={this.loading}
+            />
+          </div>,
+          10
+        );
+      }
+
+      items.add(
+        'submit',
+        <div className="Form-group">
+          <Button className="Button Button--primary Button--block" type="submit" loading={this.loading}>
+            {app.translator.trans('core.forum.sign_up.submit_button')}
+          </Button>
+        </div>,
+        -10
       );
     }
-
-    items.add(
-      'submit',
-      <div className="Form-group">
-        <Button className="Button Button--primary Button--block" type="submit" loading={this.loading}>
-          {app.translator.trans('core.forum.sign_up.submit_button')}
-        </Button>
-      </div>,
-      -10
-    );
 
     return items;
   }

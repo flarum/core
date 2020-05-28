@@ -10,13 +10,16 @@
 namespace Flarum\Forum\Auth;
 
 use Flarum\Http\Rememberer;
-use Flarum\User\LoginProvider;
 use Flarum\User\RegistrationToken;
+use Flarum\User\SsoProvider;
 use Flarum\User\User;
 use Illuminate\Support\Arr;
 use Laminas\Diactoros\Response\HtmlResponse;
 use Psr\Http\Message\ResponseInterface;
 
+/**
+ * @deprecated
+ */
 class ResponseFactory
 {
     /**
@@ -34,7 +37,7 @@ class ResponseFactory
 
     public function make(string $provider, string $identifier, callable $configureRegistration): ResponseInterface
     {
-        if ($user = LoginProvider::logIn($provider, $identifier)) {
+        if ($user = SsoProvider::logIn($provider, $identifier)) {
             return $this->makeLoggedInResponse($user);
         }
 
@@ -43,7 +46,7 @@ class ResponseFactory
         $provided = $registration->getProvided();
 
         if (! empty($provided['email']) && $user = User::where(Arr::only($provided, 'email'))->first()) {
-            $user->loginProviders()->create(compact('provider', 'identifier'));
+            $user->ssoProviders()->create(compact('provider', 'identifier'));
 
             return $this->makeLoggedInResponse($user);
         }

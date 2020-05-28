@@ -55,6 +55,18 @@ return function (RouteCollection $map, RouteHandlerFactory $route) {
         $route->toController(Controller\LogInController::class)
     );
 
+    $map->get(
+        '/auth/{provider}',
+        'sso',
+        $route->toController(Controller\SsoController::class)
+    );
+
+    $map->post(
+        '/auth/{provider}',
+        'sso',
+        $route->toController(Controller\SsoController::class)
+    );
+
     $map->post(
         '/register',
         'register',
