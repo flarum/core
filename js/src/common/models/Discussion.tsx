@@ -2,40 +2,40 @@ import Model from '../Model';
 import computed from '../utils/computed';
 import ItemList from '../utils/ItemList';
 import Badge from '../components/Badge';
+import User from './User';
+import Post from './Post';
 
-export default class Discussion extends Model {}
+export default class Discussion extends Model {
+  title = Model.attribute<string>('title');
+  slug = Model.attribute<string>('slug');
 
-Object.assign(Discussion.prototype, {
-  title: Model.attribute('title'),
-  slug: Model.attribute('slug'),
+  createdAt = Model.attribute<Date>('createdAt', Model.transformDate);
+  user = Model.hasOne<User>('user');
+  firstPost = Model.hasOne<Post>('firstPost');
 
-  createdAt: Model.attribute('createdAt', Model.transformDate),
-  user: Model.hasOne('user'),
-  firstPost: Model.hasOne('firstPost'),
+  lastPostedAt = Model.attribute<Date>('lastPostedAt', Model.transformDate);
+  lastPostedUser = Model.hasOne<User>('lastPostedUser');
+  lastPost = Model.hasOne<Post>('lastPost');
+  lastPostNumber = Model.attribute<number>('lastPostNumber');
 
-  lastPostedAt: Model.attribute('lastPostedAt', Model.transformDate),
-  lastPostedUser: Model.hasOne('lastPostedUser'),
-  lastPost: Model.hasOne('lastPost'),
-  lastPostNumber: Model.attribute('lastPostNumber'),
+  commentCount = Model.attribute<number>('commentCount');
+  replyCount = computed<number>('commentCount', (commentCount) => Math.max(0, commentCount - 1));
+  posts = Model.hasMany<Post>('posts');
+  mostRelevantPost = Model.hasOne<Post>('mostRelevantPost');
 
-  commentCount: Model.attribute('commentCount'),
-  replyCount: computed('commentCount', (commentCount) => Math.max(0, commentCount - 1)),
-  posts: Model.hasMany('posts'),
-  mostRelevantPost: Model.hasOne('mostRelevantPost'),
+  lastReadAt = Model.attribute<Date>('lastReadAt', Model.transformDate);
+  lastReadPostNumber = Model.attribute<number>('lastReadPostNumber');
+  isUnread = computed<boolean>('unreadCount', (unreadCount) => !!unreadCount);
+  isRead = computed<boolean>('unreadCount', (unreadCount) => app.session.user && !unreadCount);
 
-  lastReadAt: Model.attribute('lastReadAt', Model.transformDate),
-  lastReadPostNumber: Model.attribute('lastReadPostNumber'),
-  isUnread: computed('unreadCount', (unreadCount) => !!unreadCount),
-  isRead: computed('unreadCount', (unreadCount) => app.session.user && !unreadCount),
+  hiddenAt = Model.attribute<Date>('hiddenAt', Model.transformDate);
+  hiddenUser = Model.hasOne<User>('hiddenUser');
+  isHidden = computed<boolean>('hiddenAt', (hiddenAt) => !!hiddenAt);
 
-  hiddenAt: Model.attribute('hiddenAt', Model.transformDate),
-  hiddenUser: Model.hasOne('hiddenUser'),
-  isHidden: computed('hiddenAt', (hiddenAt) => !!hiddenAt),
-
-  canReply: Model.attribute('canReply'),
-  canRename: Model.attribute('canRename'),
-  canHide: Model.attribute('canHide'),
-  canDelete: Model.attribute('canDelete'),
+  canReply = Model.attribute<boolean>('canReply');
+  canRename = Model.attribute<boolean>('canRename');
+  canHide = Model.attribute<boolean>('canHide');
+  canDelete = Model.attribute<boolean>('canDelete');
 
   /**
    * Remove a post from the discussion's posts relationship.
@@ -55,7 +55,7 @@ Object.assign(Discussion.prototype, {
         }
       });
     }
-  },
+  }
 
   /**
    * Get the estimated number of unread posts in this discussion for the current
@@ -64,7 +64,7 @@ Object.assign(Discussion.prototype, {
    * @return {Integer}
    * @public
    */
-  unreadCount() {
+  unreadCount(): number {
     const user = app.session.user;
 
     if (user && user.markedAllAsReadAt() < this.lastPostedAt()) {
@@ -75,7 +75,7 @@ Object.assign(Discussion.prototype, {
     }
 
     return 0;
-  },
+  }
 
   /**
    * Get the Badge components that apply to this discussion.
@@ -83,7 +83,7 @@ Object.assign(Discussion.prototype, {
    * @return {ItemList}
    * @public
    */
-  badges() {
+  badges(): ItemList {
     const items = new ItemList();
 
     if (this.isHidden()) {
@@ -91,7 +91,7 @@ Object.assign(Discussion.prototype, {
     }
 
     return items;
-  },
+  }
 
   /**
    * Get a list of all of the post IDs in this discussion.
@@ -99,9 +99,9 @@ Object.assign(Discussion.prototype, {
    * @return {Array}
    * @public
    */
-  postIds() {
+  postIds(): string[] {
     const posts = this.data.relationships.posts;
 
     return posts ? posts.data.map((link) => link.id) : [];
-  },
-});
+  }
+}

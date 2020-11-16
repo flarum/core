@@ -1,3 +1,5 @@
+import Model from '../Model';
+
 /**
  * The `computed` utility creates a function that will cache its output until
  * any of the dependent values are dirty.
@@ -7,14 +9,14 @@
  *     dependent values.
  * @return {Function}
  */
-export default function computed(...dependentKeys) {
+export default function computed<T, M = Model>(...dependentKeys: any[]) {
   const keys = dependentKeys.slice(0, -1);
   const compute = dependentKeys.slice(-1)[0];
 
   const dependentValues = {};
   let computedValue;
 
-  return function () {
+  return function (this: M): T {
     let recompute = false;
 
     // Read all of the dependent values. If any of them have changed since last

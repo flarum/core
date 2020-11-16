@@ -1,3 +1,17 @@
+import Store from './Store';
+import Mithril from 'mithril';
+
+interface ModelData {
+  type?: string;
+  id?: string;
+  attributes?: any;
+  relationships?: any;
+}
+
+interface SaveOptions extends Mithril.RequestOptions<any> {
+  meta?: any;
+}
+
 /**
  * The `Model` class represents a local data resource. It provides methods to
  * persist changes via the API.
@@ -6,54 +20,57 @@
  */
 export default class Model {
   /**
+   * The resource object from the API.
+   *
+   * @type {Object}
+   * @public
+   */
+  data: ModelData = {};
+
+  /**
+   * The time at which the model's data was last updated. Watching the value
+   * of this property is a fast way to retain/cache a subtree if data hasn't
+   * changed.
+   *
+   * @type {Date}
+   * @public
+   */
+  freshness: Date = new Date();
+
+  /**
+   * Whether or not the resource exists on the server.
+   *
+   * @type {Boolean}
+   * @public
+   */
+  exists: boolean = false;
+
+  /**
+   * The data store that this resource should be persisted to.
+   *
+   * @type {Store}
+   * @protected
+   */
+  store?: Store = null;
+
+  /**
    * @param {Object} data A resource object from the API.
    * @param {Store} store The data store that this model should be persisted to.
    * @public
    */
-  constructor(data = {}, store = null) {
-    /**
-     * The resource object from the API.
-     *
-     * @type {Object}
-     * @public
-     */
+  constructor(data: ModelData = {}, store = null) {
     this.data = data;
-
-    /**
-     * The time at which the model's data was last updated. Watching the value
-     * of this property is a fast way to retain/cache a subtree if data hasn't
-     * changed.
-     *
-     * @type {Date}
-     * @public
-     */
-    this.freshness = new Date();
-
-    /**
-     * Whether or not the resource exists on the server.
-     *
-     * @type {Boolean}
-     * @public
-     */
-    this.exists = false;
-
-    /**
-     * The data store that this resource should be persisted to.
-     *
-     * @type {Store}
-     * @protected
-     */
     this.store = store;
   }
 
   /**
    * Get the model's ID.
    *
-   * @return {Integer}
+   * @return {String}
    * @public
    * @final
    */
-  id() {
+  id(): string | undefined {
     return this.data.id;
   }
 
@@ -121,8 +138,8 @@ export default class Model {
    * @return {Promise}
    * @public
    */
-  save(attributes, options = {}) {
-    const data = {
+  save(attributes, options: SaveOptions = {}) {
+    const data: ModelData = {
       type: this.data.type,
       id: this.data.id,
       attributes,
@@ -152,7 +169,7 @@ export default class Model {
 
     this.pushData(data);
 
-    const request = { data };
+    const request: any = { data };
     if (options.meta) request.meta = options.meta;
 
     return app
@@ -220,11 +237,11 @@ export default class Model {
    * @return {String}
    * @protected
    */
-  apiEndpoint() {
+  apiEndpoint(): string {
     return '/' + this.data.type + (this.exists ? '/' + this.data.id : '');
   }
 
-  copyData() {
+  copyData(): ModelData {
     return JSON.parse(JSON.stringify(this.data));
   }
 
@@ -236,8 +253,8 @@ export default class Model {
    * @return {*}
    * @public
    */
-  static attribute(name, transform) {
-    return function () {
+  static attribute<T>(name: string, transform?: Function) {
+    return function (this: Model): T | null | undefined {
       const value = this.data.attributes && this.data.attributes[name];
 
       return transform ? transform(value) : value;
@@ -254,8 +271,8 @@ export default class Model {
    *     has not been loaded; or the model if it has been loaded.
    * @public
    */
-  static hasOne(name) {
-    return function () {
+  static hasOne<T>(name: string) {
+    return function (this: Model): T | null | false {
       if (this.data.relationships) {
         const relationship = this.data.relationships[name];
 
@@ -278,8 +295,8 @@ export default class Model {
    *     loaded, and undefined for those that have not.
    * @public
    */
-  static hasMany(name) {
-    return function () {
+  static hasMany<T>(name: string) {
+    return function (this: Model): T[] | false {
       if (this.data.relationships) {
         const relationship = this.data.relationships[name];
 
@@ -299,7 +316,7 @@ export default class Model {
    * @return {Date|null}
    * @public
    */
-  static transformDate(value) {
+  static transformDate(value: string): Date | null {
     return value ? new Date(value) : null;
   }
 
@@ -310,7 +327,7 @@ export default class Model {
    * @return {Object}
    * @protected
    */
-  static getIdentifier(model) {
+  static getIdentifier(model: Model) {
     return {
       type: model.data.type,
       id: model.data.id,
