@@ -1,6 +1,7 @@
 {
   "private": true,
   "name": "@flarum/core",
+  "type": "module",
   "dependencies": {
     "@babel/preset-typescript": "^7.10.1",
     "@types/mithril": "^2.0.3",
@@ -22,14 +23,20 @@
     "webpack-merge": "^4.1.4"
   },
   "devDependencies": {
+    "@types/jest": "^26.0.14",
     "husky": "^4.2.5",
-    "prettier": "2.0.2"
+    "jest": "^26.4.2",
+    "jest-environment-jsdom-sixteen": "^1.0.3",
+    "prettier": "2.0.2",
+    "ts-jest": "^26.3.0",
+    "typescript": "^4.0.3"
   },
   "scripts": {
-    "dev": "webpack --mode development --watch",
-    "build": "webpack --mode production",
+    "dev": "webpack --config webpack.config.cjs --mode development --watch",
+    "build": "webpack --config webpack.config.cjs --mode production",
     "format": "prettier --write src",
-    "format-check": "prettier --check src"
+    "format-check": "prettier --check src",
+    "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js"
   },
   "husky": {
     "hooks": {

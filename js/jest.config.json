@@ -1,0 +1,5 @@
+{
+  "testEnvironment": "jest-environment-jsdom-sixteen",
+  "transform": {},
+  "preset": "ts-jest"
+}
