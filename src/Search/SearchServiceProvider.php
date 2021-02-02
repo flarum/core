@@ -15,6 +15,7 @@ use Flarum\Discussion\Search\Gambit\CreatedGambit;
 use Flarum\Discussion\Search\Gambit\FulltextGambit as DiscussionFulltextGambit;
 use Flarum\Discussion\Search\Gambit\HiddenGambit;
 use Flarum\Discussion\Search\Gambit\UnreadGambit;
+use Flarum\Discussion\Search\Gambit\UpdatedGambit;
 use Flarum\Event\ConfigureDiscussionGambits;
 use Flarum\Event\ConfigureUserGambits;
 use Flarum\Foundation\AbstractServiceProvider;
@@ -69,6 +70,7 @@ class SearchServiceProvider extends AbstractServiceProvider
                 $gambits->add(CreatedGambit::class);
                 $gambits->add(HiddenGambit::class);
                 $gambits->add(UnreadGambit::class);
+                $gambits->add(UpdatedGambit::class);
 
                 $app->make('events')->dispatch(
                     new ConfigureDiscussionGambits($gambits)
