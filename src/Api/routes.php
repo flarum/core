@@ -26,6 +26,18 @@ return function (RouteCollection $map, RouteHandlerFactory $route) {
         $route->toController(Controller\CreateTokenController::class)
     );
 
+    $map->get(
+        '/tokens',
+        'tokens.index',
+        $route->toController(Controller\ListTokensController::class)
+    );
+
+    $map->delete(
+        '/tokens/{id}',
+        'tokens.delete',
+        $route->toController(Controller\DeleteTokenController::class)
+    );
+
     // Send forgot password email
     $map->post(
         '/forgot',

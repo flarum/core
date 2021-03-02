@@ -11,8 +11,11 @@ namespace Flarum\Http;
 
 use Carbon\Carbon;
 use Flarum\Database\AbstractModel;
+use Flarum\Database\ScopeVisibilityTrait;
 use Flarum\User\User;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
+use Psr\Http\Message\ServerRequestInterface;
 
 /**
  * @property string $token
@@ -20,10 +23,15 @@ use Illuminate\Support\Str;
  * @property Carbon $created_at
  * @property Carbon|null $last_activity_at
  * @property int $lifetime_seconds
+ * @property string $title
+ * @property string $last_ip_address
+ * @property string $last_user_agent
  * @property \Flarum\User\User|null $user
  */
 class AccessToken extends AbstractModel
 {
+    use ScopeVisibilityTrait;
+
     /**
      * Use a custom primary key for this model.
      *
@@ -33,7 +41,10 @@ class AccessToken extends AbstractModel
 
     protected $primaryKey = 'token';
 
-    protected $dates = ['last_activity_at'];
+    protected $dates = [
+        'created_at',
+        'last_activity_at',
+    ];
 
     /**
      * Generate an access token for the specified user.
@@ -58,6 +69,19 @@ class AccessToken extends AbstractModel
     public function touch()
     {
         $this->last_activity_at = Carbon::now();
+
+        return $this->save();
+    }
+
+    public function updateLastActivity(ServerRequestInterface $request)
+    {
+        // TODO: truncate user agent to fit the column
+        $ipAddress = Arr::get($request->getServerParams(), 'REMOTE_ADDR');
+        $userAgent = Arr::get($request->getServerParams(), 'HTTP_USER_AGENT');
+
+        $this->last_activity_at = Carbon::now();
+        $this->last_ip_address = $ipAddress;
+        $this->last_user_agent = $userAgent;
 
         return $this->save();
     }

@@ -40,6 +40,12 @@ class Rememberer
         );
     }
 
+    /**
+     * @param ResponseInterface $response
+     * @param $userId
+     * @return ResponseInterface
+     * @deprecated Should use remember() with a token
+     */
     public function rememberUser(ResponseInterface $response, $userId)
     {
         $token = AccessToken::generate($userId);

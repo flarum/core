@@ -7,6 +7,7 @@ import NotificationGrid from './NotificationGrid';
 import ChangePasswordModal from './ChangePasswordModal';
 import ChangeEmailModal from './ChangeEmailModal';
 import listItems from '../../common/helpers/listItems';
+import TokensManager from './TokensManager';
 
 /**
  * The `SettingsPage` component displays the user's settings control panel, in
@@ -45,6 +46,13 @@ export default class SettingsPage extends UserPage {
         </FieldSet>
       );
     });
+
+    items.add('tokens',
+      FieldSet.component({
+        label: 'Sessions and tokens',
+        className: 'Settings-tokens',
+      }, this.tokensItems().toArray())
+    );
 
     return items;
   }
@@ -111,6 +119,21 @@ export default class SettingsPage extends UserPage {
       >
         {app.translator.trans('core.forum.settings.privacy_disclose_online_label')}
       </Switch>
+    );
+
+    return items;
+  }
+
+  /**
+   * Build an item list for the user's tokens controls.
+   *
+   * @return {ItemList}
+   */
+  tokensItems() {
+    const items = new ItemList();
+
+    items.add('tokens-manager',
+      TokensManager.component()
     );
 
     return items;

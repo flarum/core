@@ -12,6 +12,7 @@ namespace Flarum\Http;
 use Flarum\Discussion\Discussion;
 use Flarum\Discussion\IdWithTransliteratedSlugDriver;
 use Flarum\Foundation\AbstractServiceProvider;
+use Flarum\Http\Access\AccessTokenVisibility;
 use Flarum\Settings\SettingsRepositoryInterface;
 use Flarum\User\User;
 use Flarum\User\UsernameSlugDriver;
@@ -61,5 +62,7 @@ class HttpServiceProvider extends AbstractServiceProvider
         $this->app->bind(SlugManager::class, function () {
             return new SlugManager($this->app->make('flarum.http.selectedSlugDrivers'));
         });
+
+        AccessToken::registerVisibilityScoper(new AccessTokenVisibility(), 'view');
     }
 }

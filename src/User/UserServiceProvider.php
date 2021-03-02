@@ -15,6 +15,8 @@ use Flarum\Foundation\AbstractServiceProvider;
 use Flarum\Foundation\ContainerUtil;
 use Flarum\Group\Access\GroupPolicy;
 use Flarum\Group\Group;
+use Flarum\Http\Access\AccessTokenPolicy;
+use Flarum\Http\AccessToken;
 use Flarum\Post\Access\PostPolicy;
 use Flarum\Post\Post;
 use Flarum\Settings\SettingsRepositoryInterface;
@@ -47,6 +49,7 @@ class UserServiceProvider extends AbstractServiceProvider
         $this->app->singleton('flarum.policies', function () {
             return [
                 Access\AbstractPolicy::GLOBAL => [],
+                AccessToken::class => [AccessTokenPolicy::class],
                 Discussion::class => [DiscussionPolicy::class],
                 Group::class => [GroupPolicy::class],
                 Post::class => [PostPolicy::class],

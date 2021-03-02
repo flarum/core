@@ -40,7 +40,7 @@ class AuthenticateWithHeader implements Middleware
                 $request = $request->withAttribute('apiKey', $key);
                 $request = $request->withAttribute('bypassThrottling', true);
             } elseif ($token = AccessToken::find($id)) {
-                $token->touch();
+                $token->updateLastActivity($request);
 
                 $actor = $token->user;
             }

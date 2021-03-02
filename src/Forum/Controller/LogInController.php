@@ -71,10 +71,10 @@ class LogInController implements RequestHandlerInterface
         if ($response->getStatusCode() === 200) {
             $data = json_decode($response->getBody());
 
-            $session = $request->getAttribute('session');
-            $this->authenticator->logIn($session, $data->userId);
-
             $token = AccessToken::find($data->token);
+
+            $session = $request->getAttribute('session');
+            $this->authenticator->logIn($session, $token);
 
             event(new LoggedIn($this->users->findOrFail($data->userId), $token));
 

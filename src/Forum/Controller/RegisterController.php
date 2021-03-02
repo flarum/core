@@ -11,6 +11,7 @@ namespace Flarum\Forum\Controller;
 
 use Flarum\Api\Client;
 use Flarum\Api\Controller\CreateUserController;
+use Flarum\Http\AccessToken;
 use Flarum\Http\Rememberer;
 use Flarum\Http\SessionAuthenticator;
 use Psr\Http\Message\ResponseInterface;
@@ -62,10 +63,12 @@ class RegisterController implements RequestHandlerInterface
         if (isset($body->data)) {
             $userId = $body->data->id;
 
-            $session = $request->getAttribute('session');
-            $this->authenticator->logIn($session, $userId);
+            $token = AccessToken::generate($userId);
 
-            $response = $this->rememberer->rememberUser($response, $userId);
+            $session = $request->getAttribute('session');
+            $this->authenticator->logIn($session, $token);
+
+            $response = $this->rememberer->remember($response, $token);
         }
 
         return $response;
