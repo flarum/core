@@ -151,3 +151,21 @@
     }
   }
 }
+
+.DiscussionPage-discussion {
+  @media @desktop-up {
+    .container.scrolled {
+      padding-top: ~"calc(90px + @{header-height})";
+    }
+  }
+
+  @media (max-width: @screen-tablet-max) {
+    .container.scrolled {
+      padding-top: ~"calc(50px + @{header-height})";
+    }
+  }
+
+    .DiscussionPage-nav {
+      margin-top: -1px;
+    }
+}

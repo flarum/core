@@ -9,6 +9,7 @@ import SplitDropdown from '../../common/components/SplitDropdown';
 import listItems from '../../common/helpers/listItems';
 import DiscussionControls from '../utils/DiscussionControls';
 import PostStreamState from '../states/PostStreamState';
+import ScrollListener from '../../common/utils/ScrollListener';
 
 /**
  * The `DiscussionPage` component displays a whole discussion page, including
@@ -49,6 +50,26 @@ export default class DiscussionPage extends Page {
     app.history.push('discussion');
 
     this.bodyClass = 'App--discussion';
+  }
+
+  oncreate(vnode) {
+    super.oncreate(vnode);
+
+    const scrollListener = new ScrollListener((top) => {
+      const $hero = $('.DiscussionHero');
+      if ($hero.offset()) {
+        const container = $('.DiscussionHero').children('.container');
+        const containerPadding = parseInt(container.css('padding-top')) + parseInt(container.css('padding-bottom'));
+
+        $hero.toggleClass('DiscussionHero--floating', top > 22 + containerPadding);
+        $('.DiscussionPage-discussion')
+          .children('.container')
+          .toggleClass('scrolled', top > 22 + containerPadding);
+      }
+    });
+
+    scrollListener.start();
+    scrollListener.update();
   }
 
   onremove() {

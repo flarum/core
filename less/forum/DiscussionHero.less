@@ -1,4 +1,6 @@
 .DiscussionHero {
+  z-index: 1;
+
   .badges {
     margin-right: 10px;
     margin-bottom: -2px;
@@ -17,4 +19,43 @@
 .DiscussionHero-title {
   display: inline;
   vertical-align: middle;
+}
+
+.DiscussionHero--floating {
+  position: fixed;
+  width: 100%;
+  .box-shadow(0 1px 6px @shadow-color);
+
+  @media @desktop-up {
+    height: 50px;
+  }
+
+  @media (max-width: @screen-tablet-max) {
+    height: 40px;
+  }
+
+  > .container {
+    padding-top: 10px !important;
+  }
+
+  .DiscussionHero-items {
+    li {
+      vertical-align: middle;
+    }
+
+    .item-title {
+      display: inline-block;
+      margin-top: -2px;
+    }
+
+    .tooltip {
+      top: unset !important;
+      bottom: -30px;
+    }
+
+    .tooltip-arrow {
+      top: 0;
+      .scale(1, -1);
+    }
+  }
 }
