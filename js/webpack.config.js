@@ -1,6 +1,7 @@
 const config = require('flarum-webpack-config');
 const { BundleAnalyzerPlugin } = require('webpack-bundle-analyzer');
 const merge = require('webpack-merge');
+const TerserPlugin = require("terser-webpack-plugin");
 
 const useBundleAnalyzer = process.env.ANALYZER === 'true';
 
@@ -21,6 +22,11 @@ module.exports = merge(config(), {
   },
 
   plugins,
+  optimization: {
+    minimizer: [new TerserPlugin({
+      extractComments: false,
+    })],
+  },
 });
 
 module.exports['module'].rules[0].test = /\.(tsx?|js)$/;
