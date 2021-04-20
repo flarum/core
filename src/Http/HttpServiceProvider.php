@@ -58,6 +58,7 @@ class HttpServiceProvider extends AbstractServiceProvider
 
             return $compiledDrivers;
         });
+
         $this->container->bind(SlugManager::class, function () {
             return new SlugManager($this->container->make('flarum.http.selectedSlugDrivers'));
         });

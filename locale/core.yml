@@ -303,6 +303,15 @@ core:
       username_heading: => core.ref.username
       username_label: => core.ref.username
 
+    error:
+      401_text: You do not have permission to access this page. Try again after logging in.
+      403_text: You do not have permission to access this page.
+      404_text: The page you requested could not be found.
+      401_title: Not Authenticated
+      403_title: Permission Denied
+      404_title: Not Found
+      404_link_text: "Return to {forum}"
+
     # These translations are used in the Forgot Password modal dialog.
     forgot_password:
       dismiss_button: => core.ref.okay
@@ -521,10 +530,6 @@ core:
       csrf_token_mismatch: You have been inactive for too long.
       csrf_token_mismatch_return_link: Go back, to try again
       invalid_confirmation_token: This confirmation link has already been used or is invalid.
-      not_authenticated: You do not have permission to access this page. Try again after logging in.
-      not_found: The page you requested could not be found.
-      not_found_return_link: "Return to {forum}"
-      permission_denied: You do not have permission to access this page.
       unknown: An error occurred while trying to load this page.
 
     # Translations in this namespace are displayed by the basic HTML discussion index.

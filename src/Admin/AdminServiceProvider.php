@@ -12,6 +12,7 @@ namespace Flarum\Admin;
 use Flarum\Extension\Event\Disabled;
 use Flarum\Extension\Event\Enabled;
 use Flarum\Foundation\AbstractServiceProvider;
+use Flarum\Foundation\ErrorHandling\FrontendFormatter;
 use Flarum\Foundation\ErrorHandling\Registry;
 use Flarum\Foundation\ErrorHandling\Reporter;
 use Flarum\Foundation\ErrorHandling\ViewFormatter;
@@ -66,6 +67,7 @@ class AdminServiceProvider extends AbstractServiceProvider
             return new HttpMiddleware\HandleErrors(
                 $this->container->make(Registry::class),
                 $this->container['flarum.config']->inDebugMode() ? $this->container->make(WhoopsFormatter::class) : $this->container->make(ViewFormatter::class),
+                $this->container->make(FrontendFormatter::class),
                 $this->container->tagged(Reporter::class)
             );
         });

@@ -73,9 +73,12 @@ class ApiServiceProvider extends AbstractServiceProvider
         });
 
         $this->container->bind('flarum.api.error_handler', function () {
+            $jsonFormatter = new JsonApiFormatter($this->container['flarum.config']->inDebugMode());
+
             return new HttpMiddleware\HandleErrors(
                 $this->container->make(Registry::class),
-                new JsonApiFormatter($this->container['flarum.config']->inDebugMode()),
+                $jsonFormatter,
+                $jsonFormatter, // This won't be used.
                 $this->container->tagged(Reporter::class)
             );
         });

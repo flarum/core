@@ -23,6 +23,7 @@ class HandledError
     private $error;
     private $type;
     private $statusCode;
+    private $frontendContentClass;
 
     private $details = [];
 
@@ -31,11 +32,12 @@ class HandledError
         return new static($error, 'unknown', 500);
     }
 
-    public function __construct(Throwable $error, $type, $statusCode)
+    public function __construct(Throwable $error, $type, $statusCode, $frontendContentClass = null)
     {
         $this->error = $error;
         $this->type = $type;
         $this->statusCode = $statusCode;
+        $this->frontendContentClass = $frontendContentClass;
     }
 
     public function withDetails(array $details): self
@@ -63,6 +65,11 @@ class HandledError
     public function shouldBeReported(): bool
     {
         return $this->type === 'unknown';
+    }
+
+    public function contentClass()
+    {
+        return $this->frontendContentClass;
     }
 
     public function getDetails(): array

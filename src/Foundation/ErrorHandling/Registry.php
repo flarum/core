@@ -10,6 +10,7 @@
 namespace Flarum\Foundation\ErrorHandling;
 
 use Flarum\Foundation\KnownError;
+use Illuminate\Support\Arr;
 use Throwable;
 
 /**
@@ -24,12 +25,14 @@ class Registry
     private $statusMap;
     private $classMap;
     private $handlerMap;
+    private $contentMap;
 
-    public function __construct(array $statusMap, array $classMap, array $handlerMap)
+    public function __construct(array $statusMap, array $classMap, array $handlerMap, array $contentMap)
     {
         $this->statusMap = $statusMap;
         $this->classMap = $classMap;
         $this->handlerMap = $handlerMap;
+        $this->contentMap = $contentMap;
     }
 
     /**
@@ -55,20 +58,23 @@ class Registry
     {
         $errorType = null;
 
+        $errorClass = get_class($error);
         if ($error instanceof KnownError) {
             $errorType = $error->getType();
         } else {
-            $errorClass = get_class($error);
             if (isset($this->classMap[$errorClass])) {
                 $errorType = $this->classMap[$errorClass];
             }
         }
 
+        $errorContent = Arr::get($this->contentMap, $errorClass);
+
         if ($errorType) {
             return new HandledError(
                 $error,
                 $errorType,
-                $this->statusMap[$errorType] ?? 500
+                $this->statusMap[$errorType] ?? 500,
+                $errorContent
             );
         }
 

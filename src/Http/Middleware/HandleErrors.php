@@ -37,14 +37,20 @@ class HandleErrors implements Middleware
     protected $formatter;
 
     /**
+     * @var HttpFormatter
+     */
+    protected $frontendFormatter;
+
+    /**
      * @var \Flarum\Foundation\ErrorHandling\Reporter[]
      */
     protected $reporters;
 
-    public function __construct(Registry $registry, HttpFormatter $formatter, iterable $reporters)
+    public function __construct(Registry $registry, HttpFormatter $formatter, HttpFormatter $frontendFormatter, iterable $reporters)
     {
         $this->registry = $registry;
         $this->formatter = $formatter;
+        $this->frontendFormatter = $frontendFormatter;
         $this->reporters = $reporters;
     }
 
@@ -62,6 +68,10 @@ class HandleErrors implements Middleware
                 foreach ($this->reporters as $reporter) {
                     $reporter->report($error->getException());
                 }
+            }
+
+            if ($error->contentClass()) {
+                return $this->frontendFormatter->format($error, $request);
             }
 
             return $this->formatter->format($error, $request);

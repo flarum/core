@@ -13,6 +13,8 @@ use Flarum\Extension\Event\Disabled;
 use Flarum\Extension\Event\Enabled;
 use Flarum\Formatter\Formatter;
 use Flarum\Foundation\AbstractServiceProvider;
+use Flarum\Foundation\ErrorHandling\FrontendFormatter;
+use Flarum\Foundation\ErrorHandling\Middleware\ExecuteErrorToFrontend;
 use Flarum\Foundation\ErrorHandling\Registry;
 use Flarum\Foundation\ErrorHandling\Reporter;
 use Flarum\Foundation\ErrorHandling\ViewFormatter;
@@ -32,6 +34,7 @@ use Flarum\Settings\Event\Saved;
 use Flarum\Settings\Event\Saving;
 use Flarum\Settings\SettingsRepositoryInterface;
 use Laminas\Stratigility\MiddlewarePipe;
+use Laminas\Stratigility\MiddlewarePipeInterface;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
 class ForumServiceProvider extends AbstractServiceProvider
@@ -77,6 +80,7 @@ class ForumServiceProvider extends AbstractServiceProvider
             return new HttpMiddleware\HandleErrors(
                 $this->container->make(Registry::class),
                 $this->container['flarum.config']->inDebugMode() ? $this->container->make(WhoopsFormatter::class) : $this->container->make(ViewFormatter::class),
+                $this->container->make(FrontendFormatter::class),
                 $this->container->tagged(Reporter::class)
             );
         });
@@ -123,6 +127,30 @@ class ForumServiceProvider extends AbstractServiceProvider
 
         $this->container->bind('flarum.frontend.forum', function () {
             return $this->container->make('flarum.frontend.factory')('forum');
+        });
+
+        $this->container->when(FrontendFormatter::class)
+        ->needs(MiddlewarePipeInterface::class)
+        ->give(function () {
+            $middleware = $this->container->make('flarum.forum.middleware');
+
+            $pipe = new MiddlewarePipe;
+
+            foreach ($middleware as $middlewareClass) {
+                if (! in_array($middlewareClass, [
+                    'flarum.forum.error_handler',
+                    HttpMiddleware\InjectActorReference::class,
+                    HttpMiddleware\RememberFromCookie::class,
+                    HttpMiddleware\AuthenticateWithSession::class,
+                    'flarum.forum.route_resolver',
+                ])) {
+                    $pipe->pipe($this->container->make($middlewareClass));
+                }
+            }
+
+            $pipe->pipe(new ExecuteErrorToFrontend('forum', $this->container->make(RouteHandlerFactory::class)));
+
+            return $pipe;
         });
     }
 

@@ -24,6 +24,7 @@ import { flattenDeep } from 'lodash-es';
 import PageState from './states/PageState';
 import ModalManagerState from './states/ModalManagerState';
 import AlertManagerState from './states/AlertManagerState';
+import ErrorPage from './components/ErrorPage';
 
 /**
  * The `App` class provides a container for an application, as well as various
@@ -199,6 +200,9 @@ export default class Application {
 
     this.drawer = new Drawer();
 
+    // Needed so 404s don't get their URLs changed to the homepage.
+    // Won't affect extension routes since its added last.
+    this.routes.error = { path: '/:4xx...', component: ErrorPage };
     m.route(document.getElementById('content'), basePath + '/', mapRoutes(this.routes, basePath));
 
     // Add a class to the body which indicates that the page has been scrolled

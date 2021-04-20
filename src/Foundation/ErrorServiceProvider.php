@@ -17,6 +17,12 @@ use Flarum\Foundation\ErrorHandling\ExceptionHandler;
 use Flarum\Foundation\ErrorHandling\LogReporter;
 use Flarum\Foundation\ErrorHandling\Registry;
 use Flarum\Foundation\ErrorHandling\Reporter;
+use Flarum\Http\Content\NotAuthenticated;
+use Flarum\Http\Content\NotFound;
+use Flarum\Http\Content\PermissionDenied;
+use Flarum\Http\Exception\RouteNotFoundException;
+use Flarum\User\Exception\NotAuthenticatedException;
+use Flarum\User\Exception\PermissionDeniedException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Validation\ValidationException as IlluminateValidationException;
 use Tobscure\JsonApi\Exception\InvalidParameterException;
@@ -57,6 +63,15 @@ class ErrorServiceProvider extends AbstractServiceProvider
             ];
         });
 
+        $this->container->singleton('flarum.error.contents', function () {
+            return [
+                NotAuthenticatedException::class => NotAuthenticated::class,
+                PermissionDeniedException::class => PermissionDenied::class,
+                ModelNotFoundException::class => NotFound::class,
+                RouteNotFoundException::class => NotFound::class,
+            ];
+        });
+
         $this->container->singleton('flarum.error.handlers', function () {
             return [
                 IlluminateValidationException::class => ExceptionHandler\IlluminateValidationExceptionHandler::class,
@@ -70,7 +85,8 @@ class ErrorServiceProvider extends AbstractServiceProvider
             return new Registry(
                 $this->container->make('flarum.error.statuses'),
                 $this->container->make('flarum.error.classes'),
-                $this->container->make('flarum.error.handlers')
+                $this->container->make('flarum.error.handlers'),
+                $this->container->make('flarum.error.contents'),
             );
         });
 
