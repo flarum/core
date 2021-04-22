@@ -9,12 +9,17 @@
 
 namespace Flarum\Formatter;
 
+use __PHP_Incomplete_Class;
+use ArrayObject;
+use Flarum\Frontend\Compiler\RevisionCompiler;
 use Illuminate\Contracts\Cache\Repository;
+use Illuminate\Contracts\Filesystem\Filesystem;
+use Illuminate\Support\Arr;
 use Psr\Http\Message\ServerRequestInterface;
 use s9e\TextFormatter\Configurator;
 use s9e\TextFormatter\Unparser;
 
-class Formatter
+class Formatter extends RevisionCompiler
 {
     protected $configurationCallbacks = [];
 
@@ -35,13 +40,17 @@ class Formatter
     protected $cacheDir;
 
     /**
-     * @param Repository $cache
-     * @param string $cacheDir
+     * @var array|null
      */
-    public function __construct(Repository $cache, $cacheDir)
+    protected static $formatter;
+
+    public function __construct(Repository $cache, string $cacheDir, Filesystem $assetsDir)
     {
         $this->cache = $cache;
         $this->cacheDir = $cacheDir;
+        $this->assetsDir = $assetsDir;
+
+        $this->filename = 'formatter';
     }
 
     public function addConfigurationCallback($callback)
@@ -178,13 +187,27 @@ class Formatter
      * @param string $name "renderer" or "parser" or "js"
      * @return mixed
      */
-    protected function getComponent($name)
+    protected function getComponent(string $name)
     {
-        $formatter = $this->cache->rememberForever('flarum.formatter', function () {
-            return $this->getConfigurator()->finalize();
-        });
+        if (! static::$formatter) {
+            static::$formatter = $this->cache->rememberForever('flarum.formatter', function () {
+                return $this->finalize();
+            });
+        }
 
-        return $formatter[$name];
+        // We will now execute a check on disk, to see whether the requested renderer
+        // is written to disk. In case cache is not a local file-based driver the below
+        // `getRenderer()` method won't be able to autoload the file.
+        if ($name === 'renderer') {
+            $this->ensureRendererExists();
+        }
+
+        // We will now check revisions and do a sanity check.
+        if ($this->requiresRefresh()) {
+            $this->finalize();
+        }
+
+        return Arr::get(static::$formatter, $name);
     }
 
     /**
@@ -226,5 +249,70 @@ class Formatter
     public function getJs()
     {
         return $this->getComponent('js');
+    }
+
+    protected function ensureRendererExists()
+    {
+        if (! static::$formatter) {
+            return;
+        }
+
+        $revision = $this->getRevision();
+
+        if (file_exists($this->cacheDir."/Renderer_$revision.php")) {
+            return;
+        }
+
+        $renderer = Arr::get(static::$formatter, 'renderer');
+
+        if (! empty($renderer)) {
+            file_put_contents($this->cacheDir."/Renderer_$revision.php", $renderer);
+        } else {
+            $this->finalize();
+        }
+
+        // Reload because finalizing might have generated a new one.
+        $renderer = Arr::get(static::$formatter, 'renderer');
+
+        if ($renderer && static::$formatter['renderer'] instanceof __PHP_Incomplete_Class) {
+            // Autoload the file from disk using a simple include, while suppressing errors.
+            @include $this->cacheDir."/Renderer_$revision.php";
+
+            // Reload the formatter again from cache to resolve the __PHP_Incomplete_Class
+            static::$formatter = $this->cache->get('flarum.formatter');
+        }
+    }
+
+    protected function finalize()
+    {
+        $formatter = $this->getConfigurator()->finalize();
+
+        preg_match('~^Renderer\_(?<revision>[^\.]+)$~', get_class($formatter['renderer']), $m);
+        $revision = $m['revision'];
+
+        $this->putRevision($revision);
+
+        return $formatter;
+    }
+
+    protected function requiresRefresh(): bool
+    {
+        if (! $this->getRevision()) {
+            return true;
+        }
+
+        if (! Arr::get(static::$formatter, 'renderer')) {
+            return true;
+        }
+
+        $renderer = static::$formatter['renderer'] instanceof __PHP_Incomplete_Class
+            ? (new ArrayObject(static::$formatter['renderer']))['__PHP_Incomplete_Class_Name']
+            : get_class(static::$formatter['renderer']);
+
+        if (preg_match('~^Renderer_(?<revision>[^\.]+)$~', $renderer, $m)) {
+            return $this->getRevision() !== $m['revision'];
+        }
+
+        return true;
     }
 }

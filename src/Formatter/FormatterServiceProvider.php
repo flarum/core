@@ -24,7 +24,8 @@ class FormatterServiceProvider extends AbstractServiceProvider
         $this->container->singleton('flarum.formatter', function (Container $container) {
             return new Formatter(
                 new Repository($container->make('cache.filestore')),
-                $this->container[Paths::class]->storage.'/formatter'
+                $container[Paths::class]->storage.'/formatter',
+                $container->make('filesystem')->disk('flarum-assets')
             );
         });
 
