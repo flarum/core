@@ -6,12 +6,15 @@ import 'expose-loader?exposes=dayjs!dayjs';
 import 'bootstrap/js/affix';
 import 'bootstrap/js/dropdown';
 import 'bootstrap/js/modal';
-import 'bootstrap/js/tooltip';
 import 'bootstrap/js/transition';
 import 'jquery.hotkeys/jquery.hotkeys';
 
+import jqueryTooltipCompatLayer from './jqueryTooltipCompatLayer';
+
 import relativeTime from 'dayjs/plugin/relativeTime';
 import localizedFormat from 'dayjs/plugin/localizedFormat';
+
+$.fn.tooltip = jqueryTooltipCompatLayer;
 
 dayjs.extend(relativeTime);
 dayjs.extend(localizedFormat);

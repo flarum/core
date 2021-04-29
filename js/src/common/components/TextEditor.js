@@ -52,6 +52,10 @@ export default class TextEditor extends Component {
     super.oncreate(vnode);
 
     this.attrs.composer.editor = this.buildEditor(this.$('.TextEditor-editorContainer')[0]);
+
+    this.toolbarScrollBarCheckBound = this.toolbarScrollBarCheck.bind(this);
+
+    window.addEventListener('resize', this.toolbarScrollBarCheckBound);
   }
 
   onupdate() {
@@ -61,6 +65,11 @@ export default class TextEditor extends Component {
       this.disabled = newDisabled;
       this.attrs.composer.editor.disabled(newDisabled);
     }
+  }
+
+  onbeforeremove() {
+    // Remove event listener to prevent pollution
+    window.removeEventListener(this.toolbarScrollBarCheckBound);
   }
 
   buildEditorParams() {
@@ -144,5 +153,17 @@ export default class TextEditor extends Component {
    */
   onsubmit() {
     this.attrs.onsubmit(this.value);
+  }
+
+  toolbarScrollBarCheck() {
+    const toolbarControls = $('.TextEditor-controls')[0];
+    const hasScrollbar = toolbarControls.scrollWidth > toolbarControls.clientWidth;
+    const className = 'TextEditor-controls--hasScrollbar';
+
+    if (hasScrollbar) {
+      toolbarControls.classList.add(className);
+    } else {
+      toolbarControls.classList.remove(className);
+    }
   }
 }

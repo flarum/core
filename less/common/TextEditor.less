@@ -1,49 +1,94 @@
-.TextEditor .TextEditor-editor {
-  border-radius: 0;
-  padding: 0 0 10px;
-  border: 0;
-  resize: none;
-  color: @text-color;
-  font-size: 14px;
-  line-height: 1.7;
+.TextEditor {
+  @toolbar-height: 57;
+  @toolbar-height-px: unit(@toolbar-height, px);
+  @toolbar-real-height: 90px;
 
-  &, &:focus, &[disabled] {
-    background: none;
+  @toolbar-offset: (@toolbar-real-height - @toolbar-height-px);
+
+  --toolbar-offset: @toolbar-offset;
+
+  .TextEditor-editor {
+    border-radius: 0;
+    padding: 0 0 10px;
     border: 0;
+    resize: none;
+    color: @text-color;
+    font-size: 14px;
+    line-height: 1.7;
+
+    &Container {
+      margin-bottom: -@toolbar-offset;
+    }
+
+    &,
+    &:focus,
+    &[disabled] {
+      background: none;
+      border: 0;
+    }
+
+    @media @phone {
+      font-size: 16px; // minimum font-size required to prevent page zoom on focus in iOS 10
+    }
   }
 
-  @media @phone {
-    font-size: 16px; // minimum font-size required to prevent page zoom on focus in iOS 10
-  }
-}
-.TextEditor-controls {
-  margin: 0;
-  padding: 10px 0;
-  list-style-type: none;
-  overflow-x: auto;
-  white-space: nowrap;
-
-  li {
-    display: inline-block;
-    margin-right: 10px;
-  }
-}
-.TextEditor-toolbar {
-  .Button--icon {
-    width: 28px;
-  }
-}
-
-@media @tablet-up {
-  .TextEditor-controls {
-    margin: 0 -20px 0 -105px;
+  &-controls {
+    // This is a hack that allows the CSS tooltips
+    // to overflow from the inner container, until
+    // a better way to do it exists.
+    height: @toolbar-real-height;
+    display: flex;
+    align-items: stretch;
+    overflow: hidden;
+    flex-grow: 1;
+    margin: 0;
     padding: 10px 20px;
-    border-top: 1px solid @control-bg;
+    padding-top: 0;
+    list-style-type: none;
+    overflow-x: auto;
+    white-space: nowrap;
+    display: flex;
+    align-items: flex-end;
 
-    .fullScreen & {
-      margin: 0;
-      border-top: 0;
-      padding: 20px 0;
+    &--hasScrollbar {
+      padding-bottom: 4px;
+    }
+
+    li {
+      display: inline-block;
+      margin-right: 10px;
+    }
+  }
+
+  &-toolbar {
+    .Button--icon {
+      width: 28px;
+    }
+  }
+
+  @media @tablet-up {
+    &-controls {
+      margin: 0 -20px 0 -105px;
+
+      @1px-as-pct: 100 / @toolbar-height;
+      @fake-top-border-pct: (@1px-as-pct * (@toolbar-height - 1));
+      @fake-top-border-pct-real: ~"@{fake-top-border-pct}%";
+
+      background: linear-gradient(
+        to top,
+        transparent 0%,
+        transparent @fake-top-border-pct-real,
+        @control-bg 100%
+      );
+      background-repeat: no-repeat;
+      background-size: 100% @toolbar-height-px;
+      background-position: bottom;
+
+      .fullScreen & {
+        margin: 0;
+        border-top: 0;
+        padding: 20px 0;
+      }
     }
   }
 }

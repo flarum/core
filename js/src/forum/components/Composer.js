@@ -88,7 +88,7 @@ export default class Composer extends Component {
 
     $(window)
       .on('resize', (this.handlers.onresize = this.updateHeight.bind(this)))
-      .resize();
+      .trigger('resize');
 
     $(document)
       .on('mousemove', (this.handlers.onmousemove = this.onmousemove.bind(this)))
@@ -110,8 +110,8 @@ export default class Composer extends Component {
 
     $(vnode.dom)
       .css('cursor', 'row-resize')
-      .bind('dragstart mousedown', (e) => e.preventDefault())
-      .mousedown(function (e) {
+      .on('dragstart mousedown', (e) => e.preventDefault())
+      .on('mousedown', function (e) {
         composer.mouseStart = e.clientY;
         composer.heightStart = composer.$().height();
         composer.handle = $(this);
@@ -157,7 +157,7 @@ export default class Composer extends Component {
    * Draw focus to the first focusable content element (the text editor).
    */
   focus() {
-    this.$('.Composer-content :input:enabled:visible, .TextEditor-editor').first().focus();
+    this.$('.Composer-content :input:enabled:visible, .TextEditor-editor').first().trigger('focus');
   }
 
   /**
@@ -173,10 +173,10 @@ export default class Composer extends Component {
 
     if ($flexible.length) {
       const headerHeight = $flexible.offset().top - this.$().offset().top;
-      const paddingBottom = parseInt($flexible.css('padding-bottom'), 10);
       const footerHeight = this.$('.Composer-footer').outerHeight(true);
 
-      $flexible.height(this.$().outerHeight() - headerHeight - paddingBottom - footerHeight);
+      const height = this.$().outerHeight() - headerHeight - footerHeight;
+      $flexible.css('height', `calc(${height}px + var(--toolbar-offset))`);
     }
   }
 
@@ -189,7 +189,7 @@ export default class Composer extends Component {
     const visible =
       this.state.position !== ComposerState.Position.HIDDEN && this.state.position !== ComposerState.Position.MINIMIZED && app.screen() !== 'phone';
 
-    const paddingBottom = visible ? this.state.computedHeight() - parseInt($('#app').css('padding-bottom'), 10) : 0;
+    const paddingBottom = visible ? this.state.computedHeight() - parseInt($('#app').css('padding-bottom')) + 16 : 0;
 
     $('#content').css({ paddingBottom });
   }

@@ -1,72 +1,219 @@
 // ------------------------------------
 // Tooltips
+// ------------------------------------
 
-// Base class
-.tooltip {
-  position: absolute;
-  z-index: @zindex-tooltip;
-  display: block;
-  font-size: 12px;
-  font-weight: normal;
-  line-height: 1.4;
-  opacity: 0;
-  .transition(0.15s opacity linear);
-
-  &.in     { opacity: 1; }
-  &.top    { margin-top:  -3px; padding: @tooltip-arrow-width 0; }
-  &.right  { margin-left:  3px; padding: 0 @tooltip-arrow-width; }
-  &.bottom { margin-top:   3px; padding: @tooltip-arrow-width 0; }
-  &.left   { margin-left: -3px; padding: 0 @tooltip-arrow-width; }
+// This fixes an issue in iOS where `:hover` is not handled on a tap
+@media (any-hover: none) {
+  [data-tooltip][aria-label]:not([aria-label=""]) {
+    // Remember that the cursor won't be visible on iOS!
+    cursor: pointer;
+  }
 }
 
-// Wrapper for the tooltip content
-.tooltip-inner {
-  max-width: 200px;
-  padding: 7px 12px;
-  color: @tooltip-color;
-  text-align: center;
-  text-decoration: none;
-  background-color: @tooltip-bg;
-  border-radius: @border-radius;
-}
+// General tooltip selector
+[data-tooltip][aria-label]:not([aria-label=""]) {
+  @tooltip-arrow-width: 8px;
+  @tooltip-arrow-height: 6px;
 
-// Arrows
-@tooltip-arrow-width: 5px;
+  --x-offset: 0px;
 
-.tooltip-arrow {
-  position: absolute;
-  width: 0;
-  height: 0;
-  border-color: transparent;
-  border-style: solid;
-}
-.tooltip {
-  &.top .tooltip-arrow {
-    bottom: 0;
+  // Transform while tooltip not shown
+  .preVisibleTransform(@x: -50%, @y: 8px) {
+    // Don't do slide animation if user has selected reduced motion
+    // in their OS
+    @media not all and (prefers-reduced-motion: reduce) {
+      &::before {
+        transform: translate(~"calc(@{x} + var(--x-offset))", @y);
+      }
+
+      &::after {
+        transform: translate(@x, @y);
+      }
+    }
+  }
+
+  // Transform while tooltip shown
+  .visibleTransform(@x: -50%, @y: 0) {
+    // Tooltip is visible
+    &:hover,
+    &:not([data-tooltip-nofocus]):focus,
+    &:not([data-tooltip-nofocus]):focus-within,
+    &[data-tooltip-visible] {
+      &::before {
+        transform: translate(~"calc(@{x} + var(--x-offset))", @y);
+      }
+
+      &::after {
+        transform: translate(@x, @y);
+      }
+    }
+  }
+
+  //#region ARROWS
+
+  .arrow() {
+    width: @tooltip-arrow-width;
+    height: @tooltip-arrow-height;
+
+    clip-path: polygon(0% 0%, 100% 0%, 50% 100%);
+  }
+
+  .arrow(@direction) when (@direction = "right") {
+    width: @tooltip-arrow-height;
+    height: @tooltip-arrow-width;
+
+    clip-path: polygon(0% 0%, 100% 50%, 0% 100%);
+  }
+
+  .arrow(@direction) when (@direction = "left") {
+    width: @tooltip-arrow-height;
+    height: @tooltip-arrow-width;
+
+    clip-path: polygon(100% 0%, 0% 50%, 100% 100%);
+  }
+
+  .arrow(@direction) when (@direction = "up") {
+    width: @tooltip-arrow-width;
+    height: @tooltip-arrow-height;
+
+    clip-path: polygon(50% 0%, 100% 100%, 0% 100%);
+  }
+
+  //#endregion
+
+  position: relative;
+
+  // Tooltip is visible
+  &:hover,
+  &:not([data-tooltip-nofocus]):focus,
+  &:not([data-tooltip-nofocus]):focus-within,
+  &[data-tooltip-visible] {
+    &::before,
+    &::after {
+      opacity: 1;
+    }
+  }
+
+  // Tooltip text
+  &::before {
+    display: block;
+    content: attr(aria-label);
+
+    font-size: 12px;
+
+    white-space: nowrap;
+    padding: 4px 8px;
+    border-radius: 4px;
+    color: @tooltip-color;
+    height: auto;
+
+    // Make as wide as possible
+    width: max-content;
+    // Or use 300px/100% of viewport width, whichever is smaller
+    max-width: 300px;
+
+    @media (max-width: 320px) {
+      max-width: 100vw;
+    }
+
     left: 50%;
-    margin-left: -@tooltip-arrow-width;
-    border-width: @tooltip-arrow-width @tooltip-arrow-width 0;
-    border-top-color: @tooltip-bg;
+    bottom: ~"calc(100% + @{tooltip-arrow-height})";
+
+    // Nicely handle tooltips that would be wider than 200px
+    overflow-wrap: normal;
+    overflow: hidden;
+    white-space: normal;
+    text-align: center;
   }
-  &.right .tooltip-arrow {
-    top: 50%;
-    left: 0;
-    margin-top: -@tooltip-arrow-width;
-    border-width: @tooltip-arrow-width @tooltip-arrow-width @tooltip-arrow-width 0;
-    border-right-color: @tooltip-bg;
-  }
-  &.left .tooltip-arrow {
-    top: 50%;
-    right: 0;
-    margin-top: -@tooltip-arrow-width;
-    border-width: @tooltip-arrow-width 0 @tooltip-arrow-width @tooltip-arrow-width;
-    border-left-color: @tooltip-bg;
-  }
-  &.bottom .tooltip-arrow {
-    top: 0;
+
+  // Tooltip arrow
+  &::after {
+    display: block;
+    content: "";
+
+    .arrow();
+
+    // Center arrow horizontally over component
     left: 50%;
-    margin-left: -@tooltip-arrow-width;
-    border-width: 0 @tooltip-arrow-width @tooltip-arrow-width;
-    border-bottom-color: @tooltip-bg;
+    bottom: 100%;
+  }
+
+  &::before,
+  &::after {
+    position: absolute;
+    background: @tooltip-bg;
+    z-index: @zindex-tooltip;
+
+    // Prevent tooltip showing when hovering over pseudoelement
+    pointer-events: none;
+    opacity: 0;
+
+    transition: opacity 0.18s ease-out 0.18s, transform 0.18s ease-out 0.18s;
+  }
+
+  .preVisibleTransform();
+  .visibleTransform();
+
+  &[data-tooltip-position="left"] {
+    &::before {
+      right: 100%;
+      top: 50%;
+      left: initial;
+      bottom: initial;
+    }
+
+    &::after {
+      right: ~"calc(100% - @{tooltip-arrow-height})";
+      top: 50%;
+      left: initial;
+      bottom: initial;
+
+      .arrow("right");
+    }
+
+    .preVisibleTransform(0, -50%);
+    .visibleTransform(-8px, -50%);
+  }
+
+  &[data-tooltip-position="right"] {
+    &::before {
+      left: 100%;
+      top: 50%;
+      // left: initial;
+      bottom: initial;
+    }
+
+    &::after {
+      left: ~"calc(100% - @{tooltip-arrow-height})";
+      top: 50%;
+      // left: initial;
+      bottom: initial;
+
+      .arrow("left");
+    }
+
+    .preVisibleTransform(0, -50%);
+    .visibleTransform(8px, -50%);
+  }
+
+  &[data-tooltip-position="bottom"] {
+    &::before {
+      top: ~"calc(100% + @{tooltip-arrow-height})";
+      // top: 100%;
+      // top: 50%;
+      // left: initial;
+      bottom: initial;
+    }
+
+    &::after {
+      top: ~"calc(100%)";
+      // left: initial;
+      bottom: initial;
+
+      .arrow("up");
+    }
+
+    .preVisibleTransform(-50%, -8px);
+    .visibleTransform(-50%, 0);
   }
 }

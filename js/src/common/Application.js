@@ -12,6 +12,7 @@ import mapRoutes from './utils/mapRoutes';
 import RequestError from './utils/RequestError';
 import ScrollListener from './utils/ScrollListener';
 import liveHumanTimes from './utils/liveHumanTimes';
+import tooltipWatcherInitializer from './utils/tooltipWatcherInitializer';
 import { extend } from './extend';
 
 import Forum from './models/Forum';
@@ -154,6 +155,16 @@ export default class Application {
    */
   alerts = new AlertManagerState();
 
+  /**
+   * Data related to the watching of tooltip elements.
+   *
+   * This should never be accessed outside of the tooltip watcher.
+   *
+   * @type {{ observer: MutationObserver }}
+   * @private
+   */
+  tooltipWatcher = { observer: null };
+
   data;
 
   title = '';
@@ -221,6 +232,7 @@ export default class Application {
     });
 
     liveHumanTimes();
+    tooltipWatcherInitializer.bind(this)();
   }
 
   /**

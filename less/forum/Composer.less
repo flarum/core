@@ -206,8 +206,14 @@
   .ComposerBody-editor {
     padding: 15px;
   }
-  .ComposerBody-editor .TextEditor-controls .item-submit {
-    position: absolute !important;
+  .ComposerBody-editor .TextEditor-controls {
+    .item-submit {
+      position: absolute !important;
+    }
+
+    // Stretch to edges of composer
+    margin-left: -15px;
+    margin-right: -15px;
   }
 }
 
