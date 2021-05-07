@@ -1,4 +1,5 @@
 import Component from '../../common/Component';
+import Button from '../../common/components/Button';
 import icon from '../../common/helpers/icon';
 import formatNumber from '../../common/utils/formatNumber';
 import ScrollListener from '../../common/utils/ScrollListener';
@@ -19,6 +20,8 @@ export default class PostStreamScrubber extends Component {
     this.stream = this.attrs.stream;
     this.handlers = {};
 
+    this.pendingMoveIndex = null;
+
     this.scrollListener = new ScrollListener(this.updateScrubberValues.bind(this, { fromScroll: true, forceHeightChange: true }));
   }
 
@@ -32,8 +35,17 @@ export default class PostStreamScrubber extends Component {
       formattedCount: <span className="Scrubber-count">{formatNumber(count)}</span>,
     });
 
+    const index = this.stream.index;
+    const previousIndex = this.stream.previousIndex;
+
+    // We want to make sure the back button isn't crammed in.
+    // If the previous post index is less than 5% from the last/first post,
+    // or if the previous post index is less than 25% from the current post, we will
+    // hide the button. Additionally, this hides the button on very short screens.
+    const showBackButton = previousIndex > count / 20 && previousIndex < count - count / 20 && 100 * Math.abs((index - previousIndex) / count) > 25;
+
     const unreadCount = this.stream.discussion.unreadCount();
-    const unreadPercent = count ? Math.min(count - this.stream.index, unreadCount) / count : 0;
+    const unreadPercent = count ? Math.min(count - index, unreadCount) / count : 0;
 
     function styleUnread(vnode) {
       const $element = $(vnode.dom);
@@ -66,6 +78,18 @@ export default class PostStreamScrubber extends Component {
             </a>
 
             <div className="Scrubber-scrollbar">
+              {showBackButton ? (
+                <a
+                  style={'top: ' + this.percentPerPost().index * this.stream.previousIndex + '%'}
+                  className="Scrubber-back"
+                  onclick={this.returnToLastPosition.bind(this)}
+                  title={app.translator.trans('core.forum.post_scrubber.back_title')}
+                >
+                  {icon('fas fa-chevron-left')}
+                </a>
+              ) : (
+                ''
+              )}
               <div className="Scrubber-before" />
               <div className="Scrubber-handle">
                 <div className="Scrubber-bar" />
@@ -88,6 +112,16 @@ export default class PostStreamScrubber extends Component {
         </div>
       </div>
     );
+  }
+
+  returnToLastPosition(e) {
+    // Don't fire the scrubber click event as well
+    e.stopPropagation();
+
+    this.stream.goToIndex(Math.floor(this.stream.previousIndex));
+    this.updateScrubberValues({ animate: true });
+
+    this.$().removeClass('open');
   }
 
   onupdate() {
@@ -156,7 +190,7 @@ export default class PostStreamScrubber extends Component {
    * @param {Boolean} animate
    */
   updateScrubberValues(options = {}) {
-    const index = this.stream.index;
+    const index = this.pendingMoveIndex || this.stream.index;
     const count = this.stream.count();
     const visible = this.stream.visible || 1;
     const percentPerPost = this.percentPerPost();
@@ -247,7 +281,7 @@ export default class PostStreamScrubber extends Component {
     const deltaIndex = deltaPercent / this.percentPerPost().index || 0;
     const newIndex = Math.min(this.indexStart + deltaIndex, this.stream.count() - 1);
 
-    this.stream.index = Math.max(0, newIndex);
+    this.pendingMoveIndex = Math.max(0, newIndex);
     this.updateScrubberValues();
   }
 
@@ -264,15 +298,17 @@ export default class PostStreamScrubber extends Component {
 
     // If the index we've landed on is in a gap, then tell the stream-
     // content that we want to load those posts.
-    const intIndex = Math.floor(this.stream.index);
+    const intIndex = Math.floor(this.pendingMoveIndex);
     this.stream.goToIndex(intIndex);
+    this.pendingMoveIndex = null;
   }
 
   onclick(e) {
     // Calculate the index which we want to jump to based on the click position.
 
     // 1. Get the offset of the click from the top of the scrollbar, as a
-    //    percentage of the scrollbar's height.
+    //    percentage of the scrollbar's height. Save current location for the
+    //    back button.
     const $scrollbar = this.$('.Scrubber-scrollbar');
     const offsetPixels = (e.pageY || e.originalEvent.touches[0].pageY) - $scrollbar.offset().top + $('body').scrollTop();
     let offsetPercent = (offsetPixels / $scrollbar.outerHeight()) * 100;
