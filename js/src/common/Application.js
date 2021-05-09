@@ -12,6 +12,7 @@ import mapRoutes from './utils/mapRoutes';
 import RequestError from './utils/RequestError';
 import ScrollListener from './utils/ScrollListener';
 import liveHumanTimes from './utils/liveHumanTimes';
+import patchMithril from './utils/patchMithril';
 import { extend } from './extend';
 
 import Forum from './models/Forum';
@@ -166,6 +167,8 @@ export default class Application {
   }
 
   boot() {
+    patchMithril(window);
+
     this.initializers.toArray().forEach((initializer) => initializer(this));
 
     this.store.pushPayload({ data: this.data.resources });

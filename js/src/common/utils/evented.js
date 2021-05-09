@@ -2,7 +2,7 @@
  * The `evented` mixin provides methods allowing an object to trigger events,
  * running externally registered event handlers.
  */
-export default {
+const evented = {
   /**
    * Arrays of registered event handlers, grouped by the event name.
    *
@@ -79,3 +79,5 @@ export default {
     }
   },
 };
+
+export default evented;

@@ -8,7 +8,7 @@ import extractText from '../../common/utils/extractText';
  * The `PostControls` utility constructs a list of buttons for a post which
  * perform actions on it.
  */
-export default {
+const PostControls = {
   /**
    * Get a list of controls for a post.
    *
@@ -199,3 +199,5 @@ export default {
       });
   },
 };
+
+export default PostControls;

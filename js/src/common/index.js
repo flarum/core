@@ -1,5 +1,5 @@
 // Expose jQuery, mithril and dayjs to the window browser object
-import 'expose-loader?exposes[]=$&exposes[]=jQuery!jquery';
+import 'expose-loader?exposes=$,jQuery!jquery';
 import 'expose-loader?exposes=m!mithril';
 import 'expose-loader?exposes=dayjs!dayjs';
 
@@ -16,9 +16,9 @@ import localizedFormat from 'dayjs/plugin/localizedFormat';
 dayjs.extend(relativeTime);
 dayjs.extend(localizedFormat);
 
-import patchMithril from './utils/patchMithril';
+import FlarumRegistry from './FlarumRegistry';
 
-patchMithril(window);
+window.flreg = new FlarumRegistry();
 
 import * as Extend from './extend/index';
 
