@@ -15,6 +15,7 @@ use Flarum\Foundation\AbstractServiceProvider;
 use Flarum\Foundation\Console\AssetsPublishCommand;
 use Flarum\Foundation\Console\CacheClearCommand;
 use Flarum\Foundation\Console\InfoCommand;
+use Flarum\Settings\SettingsRepositoryInterface;
 use Illuminate\Console\Scheduling\Schedule as LaravelSchedule;
 use Illuminate\Console\Scheduling\ScheduleListCommand;
 use Illuminate\Console\Scheduling\ScheduleRunCommand;
@@ -67,5 +68,9 @@ class ConsoleServiceProvider extends AbstractServiceProvider
             $event = $schedule->command($scheduled['command'], $scheduled['args']);
             $scheduled['callback']($event);
         }
+
+        $container->make('flarum.locales')->getTranslator()->getCatalogue(
+            $container->make(SettingsRepositoryInterface::class)->get('default_locale', 'en')
+        );
     }
 }
