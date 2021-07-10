@@ -66,6 +66,9 @@ export default class AdminApplication extends Application {
     if (permission === 'discussion.deletePosts') {
       required.push('discussion.hidePosts');
     }
+    if (permission === 'user.editGroups') {
+      required.push('viewHiddenGroups');
+    }
 
     return required;
   }
