@@ -143,6 +143,7 @@ export default class PermissionGrid extends Component {
               { value: '1', label: app.translator.trans('core.admin.permissions_controls.signup_open_button') },
               { value: '0', label: app.translator.trans('core.admin.permissions_controls.signup_closed_button') },
             ],
+            lazyDraw: true,
           }),
       },
       90
@@ -190,6 +191,7 @@ export default class PermissionGrid extends Component {
               { value: '10', label: app.translator.trans('core.admin.permissions_controls.allow_ten_minutes_button') },
               { value: 'reply', label: app.translator.trans('core.admin.permissions_controls.allow_until_reply_button') },
             ],
+            lazyDraw: true,
           });
         },
       },

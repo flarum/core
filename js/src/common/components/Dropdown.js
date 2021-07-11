@@ -37,11 +37,12 @@ export default class Dropdown extends Component {
 
   view(vnode) {
     const items = vnode.children ? listItems(vnode.children) : [];
+    const renderItems = this.attrs.lazyDraw ? this.showing : true;
 
     return (
       <div className={'ButtonGroup Dropdown dropdown ' + this.attrs.className + ' itemCount' + items.length + (this.showing ? ' open' : '')}>
         {this.getButton(vnode.children)}
-        {this.getMenu(items)}
+        {renderItems && this.getMenu(items)}
       </div>
     );
   }
@@ -53,13 +54,25 @@ export default class Dropdown extends Component {
     // bottom of the viewport. If it does, we will apply class to make it show
     // above the toggle button instead of below it.
     this.$().on('shown.bs.dropdown', () => {
+      const { lazyDraw, onshow } = this.attrs;
+
       this.showing = true;
 
-      if (this.attrs.onshow) {
-        this.attrs.onshow();
+      // If using lazy drawing, redraw before calling `onshow` function
+      // to make sure the menu DOM exists in case the callback tries to use it.
+      if (lazyDraw) {
+        m.redraw.sync();
       }
 
-      m.redraw();
+      if (onshow) {
+        onshow();
+      }
+
+      // If not using lazy drawing, keep previous functionality
+      // of redrawing after calling onshow()
+      if (!lazyDraw) {
+        m.redraw();
+      }
 
       const $menu = this.$('.Dropdown-menu');
       const isRight = $menu.hasClass('Dropdown-menu--right');
