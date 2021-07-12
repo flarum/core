@@ -7,13 +7,21 @@
   list-style-type: none;
   position: relative;
 }
-.DiscussionList-loadMore {
+
+.DiscussionList-loadMore, .DiscussionList-loadPrev {
   text-align: center;
+}
+
+.DiscussionList-loadMore {
   margin-top: 10px;
 
   .LoadingIndicator-container {
     height: 46px;
   }
+}
+
+.DiscussionList-loadPrev .LoadingIndicator-container {
+  height: 36px;
 }
 
 @media @phone {
