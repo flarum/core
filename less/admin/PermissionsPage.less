@@ -34,8 +34,9 @@
 
 
 .PermissionsPage-permissions {
-  padding: 20px 0 200px;
+  margin: 20px 0 30px;
   overflow-x: auto;
+  max-height: 75vh;
 }
 
 .PermissionGrid {
@@ -49,11 +50,23 @@
     color: @muted-color;
   }
   thead th {
+    position: -webkit-sticky;
+    position: sticky;
+    top: 0;
+    padding-bottom: 10px;
     text-transform: uppercase;
     font-weight: bold;
     font-size: 12px;
     color: @muted-color;
+    background: @body-bg;
     min-width: 140px;
+    z-index: 1;
+
+    &:first-child {
+      left: 0;
+      z-index: 3;
+      background: @body-bg;
+    }
 
     &:not(:hover) .PermissionGrid-removeScope {
       display: none;
@@ -61,7 +74,12 @@
   }
   tbody {
     th {
+      position: -webkit-sticky;
+      position: sticky;
+      left: 0;
       padding-right: 50px;
+      z-index: 2;
+      background: inherit;
 
       .icon {
         margin-right: 5px;
@@ -114,17 +132,23 @@
   }
 }
 .PermissionGrid-section {
+  background: @body-bg;
+
   td, th {
     padding-top: 10px;
   }
 }
 .PermissionGrid-child {
+  background: @body-bg;
+
   td, th {
     position: relative;
+    z-index: 0;
   }
   th {
     font-weight: normal;
   }
+
   &:hover {
     background: lighten(@control-bg, 3%);
   }

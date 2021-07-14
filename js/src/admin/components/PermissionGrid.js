@@ -17,7 +17,7 @@ export default class PermissionGrid extends Component {
       <table className="PermissionGrid">
         <thead>
           <tr>
-            <td></td>
+            <th></th>
             {scopes.map((scope) => (
               <th>
                 {scope.label}{' '}
