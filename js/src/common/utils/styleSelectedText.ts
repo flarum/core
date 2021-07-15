@@ -140,7 +140,7 @@ function blockStyle(textarea: HTMLTextAreaElement, arg: StyleArgs): SelectionRan
 
   let selectedText = textarea.value.slice(textarea.selectionStart, textarea.selectionEnd);
   let prefixToUse = isMultipleLines(selectedText) && blockPrefix.length > 0 ? `${blockPrefix}\n` : prefix;
-  let suffixToUse = isMultipleLines(selectedText) && blockSuffix.length > 0 ? `\n${blockSuffix}` : suffix;
+  let suffixToUse = isMultipleLines(selectedText) && blockSuffix.length > 0 ? `\n${blockSuffix}` : prefixToUse === prefix ? suffix : '';
 
   if (prefixSpace) {
     const beforeSelection = textarea.value[textarea.selectionStart - 1];
@@ -198,19 +198,21 @@ function blockStyle(textarea: HTMLTextAreaElement, arg: StyleArgs): SelectionRan
 }
 
 function multilineStyle(textarea: HTMLTextAreaElement, arg: StyleArgs) {
-  const { prefix, suffix, surroundWithNewlines } = arg;
+  const { prefix, suffix, blockPrefix, blockSuffix, surroundWithNewlines } = arg;
   let text = textarea.value.slice(textarea.selectionStart, textarea.selectionEnd);
   let selectionStart = textarea.selectionStart;
   let selectionEnd = textarea.selectionEnd;
   const lines = text.split('\n');
-  const undoStyle = lines.every((line) => line.startsWith(prefix) && line.endsWith(suffix));
+  let prefixToUse = blockPrefix.length > 0 ? blockPrefix : prefix;
+  let suffixToUse = blockSuffix.length > 0 ? blockSuffix : prefixToUse == prefix ? suffix : '';
+  const undoStyle = lines.every((line) => line.startsWith(prefixToUse) && line.endsWith(suffixToUse));
 
   if (undoStyle) {
-    text = lines.map((line) => line.slice(prefix.length, line.length - suffix.length)).join('\n');
+    text = lines.map((line) => line.slice(prefixToUse.length, line.length - suffixToUse.length)).join('\n');
     selectionEnd = selectionStart + text.length;
   } else {
-    text = lines.map((line) => prefix + line + suffix).join('\n');
-    if (surroundWithNewlines) {
+    text = lines.map((line) => prefixToUse + line + suffixToUse).join('\n');
+    if (surroundWithNewlines || suffixToUse === '') {
       const { newlinesToAppend, newlinesToPrepend } = newlinesToSurroundSelectedText(textarea);
       selectionStart += newlinesToAppend.length;
       selectionEnd = selectionStart + text.length;
