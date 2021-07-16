@@ -9,7 +9,6 @@
 
 namespace Flarum\Api\Controller;
 
-use Intervention\Image\Image;
 use Intervention\Image\ImageManager;
 use Psr\Http\Message\UploadedFileInterface;
 
@@ -22,12 +21,13 @@ class UploadFaviconController extends UploadImageController
     /**
      * {@inheritdoc}
      */
-    protected function makeImage(UploadedFileInterface $file): Image
+    protected function makeImage(UploadedFileInterface $file)
     {
         $this->fileExtension = pathinfo($file->getClientFilename(), PATHINFO_EXTENSION);
 
         if ($this->fileExtension === 'ico') {
             $encodedImage = $file->getStream();
+            error_log(get_class($encodedImage));
         } else {
             $manager = new ImageManager();
 

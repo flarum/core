@@ -9,7 +9,6 @@
 
 namespace Flarum\Api\Controller;
 
-use Intervention\Image\Image;
 use Intervention\Image\ImageManager;
 use Psr\Http\Message\UploadedFileInterface;
 
@@ -22,7 +21,7 @@ class UploadLogoController extends UploadImageController
     /**
      * {@inheritdoc}
      */
-    protected function makeImage(UploadedFileInterface $file): Image
+    protected function makeImage(UploadedFileInterface $file)
     {
         $manager = new ImageManager();
 

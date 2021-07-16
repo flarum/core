@@ -16,6 +16,7 @@ use Illuminate\Contracts\Filesystem\Filesystem;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
 use Intervention\Image\Image;
+use Laminas\Diactoros\Stream;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\UploadedFileInterface;
 use Tobscure\JsonApi\Document;
@@ -83,7 +84,7 @@ abstract class UploadImageController extends ShowForumController
 
     /**
      * @param UploadedFileInterface $file
-     * @return Image
+     * @return Image|Stream
      */
-    abstract protected function makeImage(UploadedFileInterface $file): Image;
+    abstract protected function makeImage(UploadedFileInterface $file);
 }
