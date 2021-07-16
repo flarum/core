@@ -1,6 +1,6 @@
-<h2>Hold Up!</h2>
+<h2><?php echo $trans[$lng]['problems_hold_up'] ?></h2>
 
-<p>These problems must be resolved before you can continue the installation. If you're having trouble, get help on the <a href="https://flarum.org/docs/install.html" target="_blank">Flarum website</a>.</p>
+<p><?php echo $trans[$lng]['problems_description'] ?></p>
 
 <div class="Problems">
   <?php foreach ($problems as $problem) { ?>

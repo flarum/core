@@ -1,19 +1,19 @@
-<h2>Update Flarum</h2>
+<h2><?php echo $trans[$lng]['update_title'] ?></h2>
 
-<p>Enter your database password to update Flarum. Before you proceed, you should <strong>back up your database</strong>. If you have any trouble, get help on the <a href="http://flarum.org/docs/update.html" target="_blank">Flarum website</a>.</p>
+<p><?php echo $trans[$lng]['update_description'] ?></p>
 
 <form method="post">
   <div id="error" style="display:none"></div>
 
   <div class="FormGroup">
     <div class="FormField">
-      <label>Database Password</label>
+      <label><?php echo $trans[$lng]['mysql_password_label'] ?></label>
       <input type="password" name="databasePassword">
     </div>
   </div>
 
   <div class="FormButtons">
-    <button type="submit">Update Flarum</button>
+    <button type="submit"><?php echo $trans[$lng]['update_title'] ?></button>
   </div>
 </form>
 
@@ -26,7 +26,7 @@ $(function() {
     e.preventDefault();
 
     var $button = $(this).find('button')
-      .text('Please Wait...')
+      .text('<?php echo $trans[$lng]['wait_label'] ?>')
       .prop('disabled', true);
 
     $.post('', $(this).serialize())
@@ -34,9 +34,9 @@ $(function() {
         window.location.reload();
       })
       .fail(function(data) {
-        $('#error').show().text('Something went wrong:\n\n' + data.responseText);
+        $('#error').show().text('<?php echo $trans[$lng]['went_wrong_label'] ?>\n\n' + data.responseText);
 
-        $button.prop('disabled', false).text('Update Flarum');
+        $button.prop('disabled', false).text('<?php echo $trans[$lng]['update_title'] ?>');
       });
 
     return false;

@@ -156,11 +156,34 @@
         font-size: 13px;
         margin: 5px 0 0;
       }
+      .SelectWrap{
+        position: relative;
+        height: 1rem;
+      }
+      .SelectWrap select{
+        margin: 0 0 1px;
+        border: 2px solid transparent;
+        color: #7E96B3;
+        position: absolute;
+        right: 0;
+        outline: none;
+        border: none;
+        padding-left: 10px;
+        text-align-last:right;
+      }
     </style>
   </head>
 
   <body>
     <div class="container">
+      <div class="SelectWrap animated fadeIn">
+        <select onchange="window.location=this.value;">
+          <option selected disabled hidden>Language</option>
+          <option value="?lang=en">English</option>
+          <option value="?lang=zh-CN">简体中文</option>
+          <option value="?lang=zh-HK">繁體中文</option>
+        </select>
+      </div>
       <h1>
         <?php echo file_get_contents(__DIR__.'/logo.svg'); ?>
       </h1>
