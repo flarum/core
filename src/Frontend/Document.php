@@ -123,6 +123,11 @@ class Document implements Renderable
     public $css = [];
 
     /**
+     * @var array
+     */
+    public $premadeData = [];
+
+    /**
      * @var Factory
      */
     protected $view;
@@ -159,6 +164,16 @@ class Document implements Renderable
     }
 
     /**
+     * Prepares the document to be populated.
+     *
+     * @return void
+     */
+    public function prepare()
+    {
+        $this->premadeData['title'] = $this->makeTitle();
+    }
+
+    /**
      * @return View
      */
     protected function makeView(): View
@@ -180,6 +195,10 @@ class Document implements Renderable
      */
     protected function makeTitle(): string
     {
+        if (isset($this->premadeData['title'])) {
+            return $this->premadeData['title'];
+        }
+
         $onHomePage = rtrim($this->request->getUri()->getPath(), '/') === '';
 
         return ($this->title && ! $onHomePage ? $this->title.' - ' : '').Arr::get($this->forumApiDocument, 'data.attributes.title');

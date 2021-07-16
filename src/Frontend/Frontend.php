@@ -58,6 +58,8 @@ class Frontend
 
     protected function populate(Document $document, Request $request)
     {
+        $document->prepare();
+
         foreach ($this->content as $content) {
             $content($document, $request);
         }
