@@ -1,4 +1,4 @@
-import * as extend from './extend';
+import * as extend from './extend.ts';
 import Session from './Session';
 import Store from './Store';
 import BasicEditorDriver from './utils/BasicEditorDriver';

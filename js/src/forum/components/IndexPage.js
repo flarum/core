@@ -1,4 +1,3 @@
-import { extend } from '../../common/extend';
 import Page from '../../common/components/Page';
 import ItemList from '../../common/utils/ItemList';
 import listItems from '../../common/helpers/listItems';

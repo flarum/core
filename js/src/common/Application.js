@@ -12,7 +12,7 @@ import mapRoutes from './utils/mapRoutes';
 import RequestError from './utils/RequestError';
 import ScrollListener from './utils/ScrollListener';
 import liveHumanTimes from './utils/liveHumanTimes';
-import { extend } from './extend';
+import { extend } from './extend.ts';
 
 import Forum from './models/Forum';
 import User from './models/User';

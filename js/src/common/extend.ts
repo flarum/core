@@ -1,3 +1,10 @@
+export type KeyOfType<T extends object, Type> = Exclude<
+  {
+    [K in keyof T]: T[K] extends Type ? K : never;
+  }[keyof T],
+  undefined
+>;
+
 /**
  * Extend an object's method by running its output through a mutating callback
  * every time it is called.
@@ -19,23 +26,27 @@
  *   // something that needs to be run on creation and update
  * });
  *
- * @param {object} object The object that owns the method
- * @param {string|string[]} methods The name or names of the method(s) to extend
- * @param {function} callback A callback which mutates the method's output
+ * @param object The object that owns the method
+ * @param methods The name or names of the method(s) to extend
+ * @param callback A callback which mutates the method's output
  */
-export function extend(object, methods, callback) {
+export function extend<T extends object, K extends KeyOfType<T, Function>>(
+  object: T,
+  methods: K | K[],
+  callback: (val: ReturnType<T[K]>, ...args: Parameters<T[K]>) => void
+) {
   const allMethods = Array.isArray(methods) ? methods : [methods];
 
-  allMethods.forEach((method) => {
-    const original = object[method];
+  allMethods.forEach((method: K) => {
+    const original: Function | undefined = object[method];
 
-    object[method] = function (...args) {
+    object[method] = function (this: T, ...args: Parameters<T[K]>) {
       const value = original ? original.apply(this, args) : undefined;
 
-      callback.apply(this, [value].concat(args));
+      callback.apply(this, [value, ...args]);
 
       return value;
-    };
+    } as T[K];
 
     Object.assign(object[method], original);
   });
@@ -64,19 +75,23 @@ export function extend(object, methods, callback) {
  *   // something that needs to be run on creation and update
  * });
  *
- * @param {object} object The object that owns the method
- * @param {string|string[]} method The name or names of the method(s) to override
- * @param {function} newMethod The method to replace it with
+ * @param object The object that owns the method
+ * @param methods The name or names of the method(s) to override
+ * @param newMethod The method to replace it with
  */
-export function override(object, methods, newMethod) {
+export function override<T extends object, K extends KeyOfType<T, Function>>(
+  object: T,
+  methods: K | K[],
+  newMethod: (orig: T[K], ...args: Parameters<T[K]>) => void
+) {
   const allMethods = Array.isArray(methods) ? methods : [methods];
 
   allMethods.forEach((method) => {
-    const original = object[method];
+    const original: Function = object[method];
 
-    object[method] = function (...args) {
-      return newMethod.apply(this, [original.bind(this)].concat(args));
-    };
+    object[method] = function (this: T, ...args: Parameters<T[K]>) {
+      return newMethod.apply(this, [original.bind(this), ...args]);
+    } as T[K];
 
     Object.assign(object[method], original);
   });
