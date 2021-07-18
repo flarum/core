@@ -55,7 +55,7 @@ export default class AlertManagerState {
   /**
    * Dismiss an alert.
    */
-  dismiss(key: AlertIdentifier): void {
+  dismiss(key: AlertIdentifier | null): void {
     if (!key || !(key in this.activeAlerts)) return;
 
     delete this.activeAlerts[key];

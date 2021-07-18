@@ -1,3 +1,5 @@
+import Mithril from 'mithril';
+
 import ItemList from './utils/ItemList';
 import Button from './components/Button';
 import ModalManager from './components/ModalManager';
@@ -23,6 +25,21 @@ import Notification from './models/Notification';
 import PageState from './states/PageState';
 import ModalManagerState from './states/ModalManagerState';
 import AlertManagerState from './states/AlertManagerState';
+import DefaultResolver from './resolvers/DefaultResolver';
+
+export type Routes = { [name: string]: { path: string; component: Mithril.Component; resolverClass?: DefaultResolver } };
+
+export type ScreenMode = 'phone' | 'tablet' | 'desktop' | 'desktop-hd';
+
+export type RequestOptions = Mithril.RequestOptions<unknown> & { [key: string]: any; url: string; extract?: (responseText: string) => string };
+
+export type RequestErrorResponse = {
+  errors: {
+    status: string;
+    code: string;
+    detail?: string;
+  }[];
+};
 
 /**
  * The `App` class provides a container for an application, as well as various
@@ -31,11 +48,8 @@ import AlertManagerState from './states/AlertManagerState';
 export default class Application {
   /**
    * The forum model for this application.
-   *
-   * @type {Forum}
-   * @public
    */
-  forum = null;
+  public forum!: Forum;
 
   /**
    * A map of routes, keyed by a unique route name. Each route is an object
@@ -50,39 +64,27 @@ export default class Application {
    * @type {Object}
    * @public
    */
-  routes = {};
+  public routes: Routes = {};
 
   /**
    * An ordered list of initializers to bootstrap the application.
-   *
-   * @type {ItemList}
-   * @public
    */
-  initializers = new ItemList();
+  public initializers: ItemList = new ItemList();
 
   /**
    * The app's session.
-   *
-   * @type {Session}
-   * @public
    */
-  session = null;
+  public session!: Session;
 
   /**
    * The app's translator.
-   *
-   * @type {Translator}
-   * @public
    */
-  translator = new Translator();
+  public translator: Translator = new Translator();
 
   /**
    * The app's data store.
-   *
-   * @type {Store}
-   * @public
    */
-  store = new Store({
+  public store: Store = new Store({
     forums: Forum,
     users: User,
     discussions: Discussion,
@@ -94,28 +96,19 @@ export default class Application {
   /**
    * A local cache that can be used to store data at the application level, so
    * that is persists between different routes.
-   *
-   * @type {Object}
-   * @public
    */
-  cache = {};
+  public cache: any = {};
 
   /**
    * Whether or not the app has been booted.
-   *
-   * @type {Boolean}
-   * @public
    */
-  booted = false;
+  public booted: boolean = false;
 
   /**
    * The key for an Alert that was shown as a result of an AJAX request error.
    * If present, it will be dismissed on the next successful request.
-   *
-   * @type {int}
-   * @private
    */
-  requestErrorAlert = null;
+  private requestErrorAlert: number | null = null;
 
   /**
    * The page the app is currently on.
@@ -123,10 +116,8 @@ export default class Application {
    * This object holds information about the type of page we are currently
    * visiting, and sometimes additional arbitrary page state that may be
    * relevant to lower-level components.
-   *
-   * @type {PageState}
    */
-  current = new PageState(null);
+  current: PageState = new PageState(null);
 
   /**
    * The page the app was on before the current page.
@@ -134,33 +125,29 @@ export default class Application {
    * Once the application navigates to another page, the object previously
    * assigned to this.current will be moved to this.previous, while this.current
    * is re-initialized.
-   *
-   * @type {PageState}
    */
-  previous = new PageState(null);
+  previous: PageState = new PageState(null);
 
   /*
    * An object that manages modal state.
-   *
-   * @type {ModalManagerState}
    */
-  modal = new ModalManagerState();
+  modal: ModalManagerState = new ModalManagerState();
 
   /**
    * An object that manages the state of active alerts.
-   *
-   * @type {AlertManagerState}
    */
-  alerts = new AlertManagerState();
+  alerts: AlertManagerState = new AlertManagerState();
 
-  data;
+  data: any;
 
-  title = '';
-  titleCount = 0;
+  title: string = '';
+  titleCount: number = 0;
 
-  initialRoute;
+  initialRoute?: string;
 
-  load(payload) {
+  drawer?: Drawer;
+
+  load(payload: any) {
     this.data = payload;
     this.translator.setLocale(payload.locale);
   }
@@ -180,7 +167,7 @@ export default class Application {
   }
 
   // TODO: This entire system needs a do-over for v2
-  bootExtensions(extensions) {
+  bootExtensions(extensions: any) {
     Object.keys(extensions).forEach((name) => {
       const extension = extensions[name];
 
@@ -228,11 +215,8 @@ export default class Application {
 
   /**
    * Get the API response document that has been preloaded into the application.
-   *
-   * @return {Object|null}
-   * @public
    */
-  preloadedApiDocument() {
+  public preloadedApiDocument(): any | null {
     // If the URL has changed, the preloaded Api document is invalid.
     if (this.data.apiDocument && window.location.href === this.initialRoute) {
       const results = this.store.pushPayload(this.data.apiDocument);
@@ -247,31 +231,24 @@ export default class Application {
 
   /**
    * Determine the current screen mode, based on our media queries.
-   *
-   * @returns {String} - one of "phone", "tablet", "desktop" or "desktop-hd"
    */
-  screen() {
+  screen(): ScreenMode {
     const styles = getComputedStyle(document.documentElement);
-    return styles.getPropertyValue('--flarum-screen');
+    return styles.getPropertyValue('--flarum-screen') as ScreenMode;
   }
 
   /**
    * Set the <title> of the page.
-   *
-   * @param {String} title
-   * @public
    */
-  setTitle(title) {
+  public setTitle(title: string) {
     this.title = title;
     this.updateTitle();
   }
 
   /**
    * Set a number to display in the <title> of the page.
-   *
-   * @param {Integer} count
    */
-  setTitleCount(count) {
+  setTitleCount(count: number) {
     this.titleCount = count;
     this.updateTitle();
   }
@@ -287,11 +264,9 @@ export default class Application {
    * Make an AJAX request, handling any low-level errors that may occur.
    *
    * @see https://mithril.js.org/request.html
-   * @param {Object} options
-   * @return {Promise}
    * @public
    */
-  request(originalOptions) {
+  public request(originalOptions: RequestOptions): Promise<unknown> {
     const options = Object.assign({}, originalOptions);
 
     // Set some default options if they haven't been overridden. We want to
@@ -300,14 +275,14 @@ export default class Application {
     // prevent redraws from occurring.
     options.background = options.background || true;
 
-    extend(options, 'config', (result, xhr) => xhr.setRequestHeader('X-CSRF-Token', this.session.csrfToken));
+    extend(options, 'config', (result: any, xhr: XMLHttpRequest) => xhr.setRequestHeader('X-CSRF-Token', this.session.csrfToken!));
 
     // If the method is something like PATCH or DELETE, which not all servers
     // and clients support, then we'll send it as a POST request with the
     // intended method specified in the X-HTTP-Method-Override header.
     if (options.method !== 'GET' && options.method !== 'POST') {
       const method = options.method;
-      extend(options, 'config', (result, xhr) => xhr.setRequestHeader('X-HTTP-Method-Override', method));
+      extend(options, 'config', (result: any, xhr: XMLHttpRequest) => xhr.setRequestHeader('X-HTTP-Method-Override', method!));
       options.method = 'POST';
     }
 
@@ -318,7 +293,7 @@ export default class Application {
 
     options.errorHandler =
       options.errorHandler ||
-      ((error) => {
+      ((error: Error) => {
         throw error;
       });
 
@@ -326,8 +301,8 @@ export default class Application {
     // response code and show an error message to the user if something's gone
     // awry.
     const original = options.extract;
-    options.extract = (xhr) => {
-      let responseText;
+    options.extract = (xhr: XMLHttpRequest) => {
+      let responseText: string | null;
 
       if (original) {
         responseText = original(xhr.responseText);
@@ -347,7 +322,7 @@ export default class Application {
       }
 
       try {
-        return JSON.parse(responseText);
+        return JSON.parse(responseText as string);
       } catch (e) {
         throw new RequestError(500, responseText, options, xhr);
       }
@@ -364,7 +339,7 @@ export default class Application {
 
         switch (error.status) {
           case 422:
-            content = error.response.errors
+            content = (error.response as RequestErrorResponse).errors
               .map((error) => [error.detail, <br />])
               .reduce((a, b) => a.concat(b), [])
               .slice(0, -1);
@@ -426,12 +401,7 @@ export default class Application {
     );
   }
 
-  /**
-   * @param {RequestError} error
-   * @param {string[]} [formattedError]
-   * @private
-   */
-  showDebug(error, formattedError) {
+  private showDebug(error: RequestError, formattedError: string[]) {
     this.alerts.dismiss(this.requestErrorAlert);
 
     this.modal.show(RequestErrorModal, { error, formattedError });
@@ -439,13 +409,8 @@ export default class Application {
 
   /**
    * Construct a URL to the route with the given name.
-   *
-   * @param {String} name
-   * @param {Object} params
-   * @return {String}
-   * @public
    */
-  route(name, params = {}) {
+  public route(name: string, params: any = {}): string {
     const route = this.routes[name];
 
     if (!route) throw new Error(`Route '${name}' does not exist`);
